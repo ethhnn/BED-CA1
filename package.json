@@ -1,0 +1,40 @@
+{
+  "name": "bed-ca1-ethanchuwasixuan",
+  "version": "1.0.0",
+  "description": "BED CA1 nodejs express mysql RESTFUL webservices Wellness Challenge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "init_tables": "node src/configs/createSchema.js && node src/configs/initTables.js",
+    "reset_tables": "node ./src/configs/initTables.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ST0503-BED/bed-ca1-EthanChuwaSiXuan.git"
+  },
+  "keywords": [
+    "node",
+    "nodemon",
+    "express",
+    "mysql2",
+    "GET",
+    "PUT",
+    "POST",
+    "DELETE",
+    "dotenv"
+  ],
+  "author": "ethanchuwa03.25@ichat.sp.edu.sg p2508638 DAAA/FT/1B/04",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ST0503-BED/bed-ca1-EthanChuwaSiXuan/issues"
+  },
+  "homepage": "https://github.com/ST0503-BED/bed-ca1-EthanChuwaSiXuan#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "mysql2": "^3.15.3",
+    "nodemon": "^3.1.11"
+  }
+}
