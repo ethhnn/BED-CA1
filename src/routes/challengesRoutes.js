@@ -6,5 +6,5 @@ const userCompletionController = require('../controllers/userCompletionControlle
 
 //place longer on top
 router.post('/:challenge_id/',userCompletionController.anySuitableFunctionName); //Endpoint 9
-router.post('/',wellnessChallengeController.anySuitableFunctionName); //Endpoint 5
+router.post('/',wellnessChallengeController.anySuitableFunctionNames); //Endpoint 5
 module.exports = router;
