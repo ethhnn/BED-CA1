@@ -28,7 +28,7 @@ CREATE TABLE WellnessChallenge (
   challenge_id INT AUTO_INCREMENT PRIMARY KEY,
   creator_id INT NOT NULL,
   description TEXT NOT NULL,
-  points INT NOT NULL,
+  points INT NOT NULL
 );
 
 INSERT INTO WellnessChallenge (creator_id, description, points) VALUES
@@ -44,7 +44,7 @@ CREATE TABLE UserCompletion (
   completion_id INT AUTO_INCREMENT PRIMARY KEY,
   challenge_id INT NOT NULL,
   user_id INT NOT NULL,
-  details TEXT,
+  details TEXT
 );
 
 INSERT INTO UserCompletion (challenge_id, user_id, details) VALUES
