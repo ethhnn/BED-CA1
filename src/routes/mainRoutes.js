@@ -6,10 +6,10 @@ const router = express.Router();
 //Better to comment out unused routes instead of deleting them
 
 
-// const challengesRoutes = require('./challengesRoutes');
-// router.use("/challenges", challengesRoutes);
+const challengesRoutes = require('./challengesRoutes');
+router.use("/challenges", challengesRoutes);
 
 const usersRoutes = require('./usersRoutes');
-router.use("/users", usersRoutes);// refer to CA1 brief
+router.use("/users", usersRoutes);
 
 module.exports = router;
