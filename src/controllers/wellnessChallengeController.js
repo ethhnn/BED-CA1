@@ -60,7 +60,7 @@ module.exports.deleteChallengeById = (req,res) =>
 
     wellnessChallengeModel.deleteChallengeById(data, callback);
 };
-module.exports.checkOwner = (req,res,next) =>{
+module.exports.errorChecks = (req,res,next) =>{
     const { user_id,description,points } = req.body;
     if (user_id == null || description == null || points==null) {
         return res.status(400).json({ message: "Missing Description, user ID or points." });
@@ -86,7 +86,7 @@ module.exports.checkOwner = (req,res,next) =>{
                 next()
             
         }
-        wellnessChallengeModel.checkOwner(data, callback);
+        wellnessChallengeModel.errorChecks(data, callback);
 }
 module.exports.updateChallengeById = (req,res) =>{
     const { user_id,description,points } = req.body;

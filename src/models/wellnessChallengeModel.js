@@ -26,7 +26,7 @@ module.exports.deleteChallengeById = (data, callback) =>
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
-module.exports.checkOwner = (data, callback) =>{
+module.exports.errorChecks = (data, callback) =>{
     const SQLSTATEMENT = `
     SELECT creator_id
     FROM wellnesschallenge

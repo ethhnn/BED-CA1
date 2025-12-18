@@ -14,8 +14,18 @@ router.delete('/:challenge_id',
     wellnessChallengeController.deleteChallengeById
 ); //Endpoint 7
 router.put('/:challenge_id',
-    wellnessChallengeController.checkOwner,
+    wellnessChallengeController.errorChecks,
     wellnessChallengeController.updateChallengeById
 ); //Endpoint 8
-
+router.post('/:challenge_id',
+    userCompletionController.checkUserExists,
+    userCompletionController.checkChallengeExistsAndExtractPoints,
+    userCompletionController.createCompletionRecord,
+    userCompletionController.addPoints,
+    userCompletionController.sendStatus
+); //Endpoint 9
+router.get('/:challenge_id',
+    userCompletionController.checkAttempts,
+    userCompletionController.getChallengeById
+); //Endpoint 10
 module.exports = router;
