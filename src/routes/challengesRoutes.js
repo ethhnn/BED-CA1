@@ -11,6 +11,7 @@ router.get('/',
     wellnessChallengeController.getAllChallenges
 ); //Endpoint 6
 router.delete('/:challenge_id',
+    userCompletionController.deleteCompletionById,
     wellnessChallengeController.deleteChallengeById
 ); //Endpoint 7
 router.put('/:challenge_id',

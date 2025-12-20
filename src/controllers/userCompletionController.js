@@ -136,3 +136,20 @@ module.exports.getChallengeById = (req, res) => {
 
     userCompletionModel.getChallengeById(data, callback);
 };
+module.exports.deleteCompletionById = (req,res,next) =>
+{
+    const data = {
+        challenge_id: req.params.challenge_id
+    }
+
+    const callback = (error, results) => {
+        if (error) {
+            console.error("Error deleteCompletionById:", error);
+            return res.status(500).json({message: "Internal server error"});
+        }
+        else next()      
+        
+    }
+
+    userCompletionModel.deleteCompletionById(data, callback);
+};

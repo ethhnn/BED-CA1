@@ -55,3 +55,12 @@ module.exports.getChallengeById = (data, callback) => {
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
+module.exports.deleteCompletionById = (data, callback) => {
+    const SQLSTATEMENT = `
+    DELETE FROM usercompletion
+    WHERE challenge_id = ?;
+    `;
+    const VALUES = [data.challenge_id];
+
+    pool.query(SQLSTATEMENT, VALUES, callback);
+}

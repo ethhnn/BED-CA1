@@ -19,4 +19,7 @@ router.put("/:user_id",
     userController.checkIfUserExists,
     userController.updateUserById
 ); //Endpoint 4
+
+
+//add top 3 
 module.exports = router;
