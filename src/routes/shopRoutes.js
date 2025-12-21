@@ -8,7 +8,9 @@ router.post("/buy",
   shopController.checkShopItemExists,  // 404
   shopController.checkSufficientPoints,// 409
   shopController.deductUserPoints,     // next()
-  shopController.addItemToInventory    // 200
+  shopController.checkInventoryRow,
+  shopController.insertOrUpdateInventory,
+  shopController.sendBuySuccess
 );
 
 module.exports = router;

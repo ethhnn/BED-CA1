@@ -55,3 +55,12 @@ module.exports.updateUserById = (data,callback) =>{
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+module.exports.deductPoints = (data, callback) => {
+  const SQLSTATEMENT = `
+    UPDATE User
+    SET points = points - ?
+    WHERE user_id = ?;
+  `;
+  const VALUES = [data.cost, data.user_id];
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};

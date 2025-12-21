@@ -32,7 +32,7 @@ module.exports.checkUserExists = (req, res, next) => {
     next();
   };
 
-  userModel.selectUserByIdWithPoints(data, callback);
+  userModel.getUserById(data, callback);
 };
 module.exports.checkShopItemExists = (req, res, next) => {
   const data = { item_id: req.body.item_id };
@@ -46,7 +46,7 @@ module.exports.checkShopItemExists = (req, res, next) => {
       return res.status(404).json({ message: "Shop item not found." });
     }
 
-    req.item = results[0]; // contains cost_points
+    req.item = results[0];
     next();
   };
 
@@ -81,4 +81,64 @@ module.exports.deductUserPoints = (req, res, next) => {
   };
 
   userModel.deductPoints(data, callback);
+};
+module.exports.checkInventoryRow = (req, res, next) => {
+    const data = {
+        user_id: req.body.user_id,
+        item_id: req.body.item_id
+    };
+
+    const callback = (error, results) => {
+        if (error) {
+            console.error("Error checkInventoryRow:", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+
+        // store for next middleware
+        req.inventoryRow = results;      // [] or [row]
+        next();
+    };
+
+    shopModel.selectInventoryRow(data, callback);
+};
+
+module.exports.insertOrUpdateInventory = (req, res, next) => {
+    const qty = req.qty ? req.qty : 1;
+
+    const data = {
+        user_id: req.body.user_id,
+        item_id: req.body.item_id,
+        quantity: qty
+    };
+
+    // if no row -> insert
+    if (req.inventoryRow.length === 0) {
+        const callback = (error, results) => {
+            if (error) {
+                console.error("Error insertInventoryRow:", error);
+                return res.status(500).json({ message: "Internal server error" });
+            }
+            next();
+        };
+
+        return shopModel.insertInventoryRow(data, callback);
+    }
+
+    // else -> update qty
+    const callback = (error, results) => {
+        if (error) {
+            console.error("Error updateInventoryQty:", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+        next();
+    };
+
+    shopModel.updateInventoryQty(data, callback);
+};
+
+module.exports.sendBuySuccess = (req, res) => {
+    return res.status(200).json({
+        message: "Purchase successful.",
+        spent_points: req.totalCost
+    });
 };

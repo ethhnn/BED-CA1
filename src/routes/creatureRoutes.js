@@ -9,8 +9,7 @@ router.get('/:user_id',
 router.get('/all/:user_id',
     creatureController.getAllCreaturesByUserId
 )
-router.post(
-  "/start",
+router.post("/start",
   creatureController.validateStartCreature,
   creatureController.checkUserExists,
   creatureController.checkUserHasNoCreature,
