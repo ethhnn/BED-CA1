@@ -99,30 +99,31 @@ CREATE TABLE UserCreature (
   creature_id INT NOT NULL,
   stage INT DEFAULT 1,
   daily_satisfaction INT DEFAULT 0,
+  evo_challenge_count INT DEFAULT 0,
   last_reset_date DATE,
   is_active TINYINT DEFAULT 1,
   UNIQUE (user_id, creature_id)
 );
-INSERT INTO UserCreature (user_creature_id, user_id, creature_id, stage, daily_satisfaction, last_reset_date, is_active) VALUES
--- Annie How (user_id = 1)
-(1, 1, 1, 1, 30, '2025-12-20', 1),  -- Active: Sproutling
-(6, 1, 2, 2, 50, '2025-12-20', 0),  -- Inactive: Aquafin
+INSERT INTO UserCreature
+(user_creature_id, user_id, creature_id, stage, daily_satisfaction, evo_challenge_count, last_reset_date, is_active)
+VALUES
+-- Annie How (user_id = 1) : still progressing first creature (only 1 creature)
+(1, 1, 1, 1, 100, 10, '2025-12-22', 1),  -- Active: Sproutling
 
--- Buay Tah Han (user_id = 2)
-(2, 2, 2, 2, 60, '2025-12-20', 1),  -- Active: Aquafin
-(7, 2, 1, 1, 10, '2025-12-20', 0),  -- Inactive: Sproutling
+-- Buay Tah Han (user_id = 2) : first creature maxed, second unlocked and active
+(2, 2, 1, 2, 100, 30, '2025-12-22', 1),   -- Active: Sproutling (max evo)
+(7, 2, 2, 1, 60, 3, '2025-12-20', 0),  -- Inactive: Aquafin
 
--- Carrie Ong (user_id = 3)
-(3, 3, 3, 1, 20, '2025-12-20', 1),  -- Active: Flameling
+-- Carrie Ong (user_id = 3) : still progressing first creature (only 1 creature)
+(3, 3, 3, 1, 20, 1, '2025-12-20', 1),  -- Active: Flameling
 
--- Da Bu Liao (user_id = 4)
-(4, 4, 4, 2, 80, '2025-12-20', 1),  -- Active: Zephyra
-(8, 4, 3, 1, 15, '2025-12-20', 0),  -- Inactive: Flameling
+-- Da Bu Liao (user_id = 4) : first creature maxed, second unlocked and active
+(4, 4, 3, 3, 0, 0, '2025-12-20', 0),   -- Inactive: Flameling (max evo)
+(8, 4, 4, 2, 80, 4, '2025-12-20', 1),  -- Active: Zephyra
 
--- Ee Zee Lee (user_id = 5)
-(5, 5, 5, 3, 100, '2025-12-20', 1), -- Active: Terranox
-(9, 5, 4, 2, 40, '2025-12-20', 0);  -- Inactive: Zephyra
-
+-- Ee Zee Lee (user_id = 5) : first creature maxed, second unlocked and active
+(5, 5, 4, 3, 0, 0, '2025-12-20', 0),   -- Inactive: Zephyra (max evo)
+(9, 5, 5, 2, 40, 2, '2025-12-20', 1);  -- Active: Terranox
 
 -- ShopItem
 CREATE TABLE ShopItem (

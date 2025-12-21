@@ -124,3 +124,4 @@ module.exports.updateUserById = (req, res) =>
 
     userModel.updateUserById(data, callback);
 }
+

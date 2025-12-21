@@ -64,3 +64,4 @@ module.exports.deductPoints = (data, callback) => {
   const VALUES = [data.cost, data.user_id];
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
