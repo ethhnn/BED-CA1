@@ -211,3 +211,46 @@ module.exports.selectActiveCreatureFull = (data, callback) => {
   `;
   pool.query(SQL, [data.user_id], callback);
 };
+
+module.exports.selectActiveCreatureBenefitByUserId = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT
+      uc.user_creature_id,
+      uc.user_id,
+      uc.creature_id,
+      uc.stage,
+      c.name AS creature_name,
+      c.benefit_type,
+      c.stage2_value,
+      c.stage3_value
+    FROM UserCreature uc
+    INNER JOIN Creature c
+      ON uc.creature_id = c.creature_id
+    WHERE uc.user_id = ?
+      AND uc.is_active = 1;
+  `;
+  const VALUES = [data.user_id];
+
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
+module.exports.countUserCompletionsByUserId = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT COUNT(*) AS total
+    FROM UserCompletion
+    WHERE user_id = ?;
+  `;
+  const VALUES = [data.user_id];
+
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
+module.exports.incrementEvoChallengeCount = (data, callback) => {
+  const SQLSTATEMENT = `
+    UPDATE UserCreature
+    SET evo_challenge_count = evo_challenge_count + 1
+    WHERE user_id = ?
+      AND is_active = 1;
+  `;
+  const VALUES = [data.user_id];
+
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};

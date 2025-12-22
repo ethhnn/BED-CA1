@@ -1,4 +1,5 @@
 const userCompletionModel = require("../models/userCompletionModel.js");
+const creatureModel = require("../models/creatureModel");
 module.exports.checkUserExists = (req, res, next) =>
 {
     const { user_id,details } = req.body;
@@ -73,7 +74,7 @@ module.exports.createCompletionRecord = (req, res,next) =>{
 module.exports.addPoints = (req, res,next) =>{
     const { user_id,details } = req.body;
     const data = {
-        points:req.points,
+        points:req.finalPoints ?? req.points,
         challenge_id: req.params.challenge_id,
         user_id,
         details
@@ -152,4 +153,126 @@ module.exports.deleteCompletionById = (req,res,next) =>
     }
 
     userCompletionModel.deleteCompletionById(data, callback);
+};
+
+module.exports.checkActiveCreatureAndExtractBenefit = (req, res, next) => {
+  const data = { user_id: req.body.user_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error checkActiveCreatureAndExtractBenefit:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    // If your game guarantees an active creature exists, keep this 404.
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Active creature not found." });
+    }
+
+    // store on req for later middlewares
+    req.activeCreature = results[0];
+    // expected fields: stage, benefit_type, stage2_value, stage3_value, creature_name (optional)
+    next();
+  };
+
+  creatureModel.selectActiveCreatureBenefitByUserId(data, callback);
+};
+module.exports.applyCreatureBenefitToPoints = (req, res, next) => {
+  const basePoints = Number(req.points);
+  const stage = Number(req.activeCreature.stage);
+
+  // default: no benefit
+  req.finalPoints = basePoints;
+  req.benefitApplied = { benefit_type: "NONE", value: 0 };
+
+  // stage 1 has no benefit
+  if (stage === 1) return next();
+
+  const benefitType = req.activeCreature.benefit_type;
+  const stage2Value = Number(req.activeCreature.stage2_value);
+  const stage3Value = Number(req.activeCreature.stage3_value);
+
+  // pick stage value
+  const stageValue = (stage === 2) ? stage2Value : stage3Value;
+
+  // IMPORTANT: Aquafin SHOP_DISCOUNT is NOT applied here (shop endpoint only)
+  if (benefitType === "SHOP_DISCOUNT") return next();
+
+  // Sproutling style: flat bonus
+  if (benefitType === "CHALLENGE_BONUS") {
+    req.finalPoints = basePoints + stageValue;
+    req.benefitApplied = { benefit_type: benefitType, value: stageValue };
+    return next();
+  }
+
+  // Flameling style: percent multiplier stored as INT (e.g. 20 = +20%)
+  if (benefitType === "CHALLENGE_MULTIPLIER") {
+    const percent = stageValue;
+    req.finalPoints = Math.round(basePoints * (1 + percent / 100));
+    req.benefitApplied = { benefit_type: benefitType, value: percent };
+    return next();
+  }
+
+  // Zephyra style: crit chance stored as INT % (e.g. 20 = 20%)
+  // bonus is fixed to keep table simple
+  if (benefitType === "CHALLENGE_CRIT_CHANCE") {
+    const chance = stageValue;
+    const bonus = (stage === 2) ? 10 : 20;
+
+    if (Math.random() < chance / 100) {
+      req.finalPoints = basePoints + bonus;
+      req.benefitApplied = { benefit_type: benefitType, value: `${chance}% (+${bonus})` };
+    } else {
+      req.finalPoints = basePoints;
+      req.benefitApplied = { benefit_type: benefitType, value: `${chance}% (no crit)` };
+    }
+    return next();
+  }
+
+  // Terranox style: milestone every N completions
+  // stageValue is N (e.g. 5 or 3). bonus fixed for simplicity.
+  if (benefitType === "CHALLENGE_MILESTONE") {
+    const data = { user_id: req.body.user_id };
+
+    const callbackCount = (error, results) => {
+      if (error) {
+        console.error("Error countUserCompletionsByUserId:", error);
+        return res.status(500).json({ message: "Internal server error" });
+      }
+
+      const currentCount = Number(results[0].total);  // before insert
+      const afterInsertCount = currentCount + 1;      // this completion will be next
+
+      const N = stageValue;
+      const bonus = (stage === 2) ? 20 : 30;
+
+      if (N > 0 && afterInsertCount % N === 0) {
+        req.finalPoints = basePoints + bonus;
+        req.benefitApplied = { benefit_type: benefitType, value: `every ${N} (+${bonus})` };
+      } else {
+        req.finalPoints = basePoints;
+        req.benefitApplied = { benefit_type: benefitType, value: `every ${N} (no bonus)` };
+      }
+
+      next();
+    };
+
+    return creatureModel.countUserCompletionsByUserId(data, callbackCount);
+  }
+
+  // unknown benefit type -> ignore safely
+  return next();
+};
+module.exports.incrementEvoChallengeCount = (req, res, next) => {
+  const data = { user_id: req.body.user_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error incrementEvoChallengeCount:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    next();
+  };
+
+  creatureModel.incrementEvoChallengeCount(data, callback);
 };

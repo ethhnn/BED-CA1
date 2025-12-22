@@ -21,8 +21,11 @@ router.put('/:challenge_id',
 router.post('/:challenge_id',
     userCompletionController.checkUserExists,
     userCompletionController.checkChallengeExistsAndExtractPoints,
+    userCompletionController.checkActiveCreatureAndExtractBenefit,
+    userCompletionController.applyCreatureBenefitToPoints,
     userCompletionController.createCompletionRecord,
     userCompletionController.addPoints,
+    userCompletionController.incrementEvoChallengeCount,
     userCompletionController.sendStatus
 ); //Endpoint 9
 router.get('/:challenge_id',

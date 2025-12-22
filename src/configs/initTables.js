@@ -86,11 +86,11 @@ CREATE TABLE Creature (
   stage3_value INT
 );
 INSERT INTO Creature (name, description, benefit_type, stage2_value, stage3_value) VALUES
-('Sproutling', 'Rewards consistent challenge completion', 'POINT_BONUS_PER_COMPLETION', 5, 10),
-('Aquafin', 'Reduces point cost of care actions', 'POINT_DISCOUNT', 2, 4),
-('Flameling', 'Boosts points earned from challenges', 'POINT_MULTIPLIER', 1.2, 1.5),
-('Zephyra', 'Grants points when caring for creature', 'POINT_REWARD_ON_CARE', 2, 4),
-('Terranox', 'Rewards fully completed daily care', 'POINT_REWARD_ON_DAILY_MAX', 10, 20);
+('Sproutling', 'Flat bonus points on every challenge completed', 'CHALLENGE_BONUS', 5, 10),
+('Aquafin', 'Discount on every shop purchase (reduce cost)', 'SHOP_DISCOUNT', 2, 4),
+('Flameling', 'Multiplier on challenge points (percentage boost)', 'CHALLENGE_MULTIPLIER', 20, 50),
+('Zephyra', 'Chance to get extra bonus points when completing a challenge (luck)', 'CHALLENGE_CRIT_CHANCE', 20, 40),
+('Terranox', 'Extra bonus points every N completed challenges (milestone)', 'CHALLENGE_MILESTONE', 5, 3);
 
 -- UserCreature (progress + active creature)
 CREATE TABLE UserCreature (
@@ -111,8 +111,8 @@ VALUES
 (1, 1, 1, 1, 100, 10, '2025-12-22', 1),  -- Active: Sproutling
 
 -- Buay Tah Han (user_id = 2) : first creature maxed, second unlocked and active
-(2, 2, 1, 2, 100, 30, '2025-12-22', 1),   -- Active: Sproutling (max evo)
-(7, 2, 2, 1, 60, 3, '2025-12-20', 0),  -- Inactive: Aquafin
+(2, 2, 1, 2, 100, 30, '2025-12-22', 0),   -- Inactive: Sproutling (max evo)
+(7, 2, 2, 2, 60, 3, '2025-12-20', 1),  -- Active: Aquafin
 
 -- Carrie Ong (user_id = 3) : still progressing first creature (only 1 creature)
 (3, 3, 3, 1, 20, 1, '2025-12-20', 1),  -- Active: Flameling

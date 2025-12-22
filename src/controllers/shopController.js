@@ -1,5 +1,6 @@
 const shopModel = require("../models/shopModel");
 const userModel = require("../models/userModel");
+const creatureModel = require("../models/creatureModel");
 module.exports.validateBuyBody = (req, res, next) => {
   const { user_id, item_id, quantity } = req.body;
 
@@ -46,6 +47,7 @@ module.exports.checkShopItemExists = (req, res, next) => {
       return res.status(404).json({ message: "Shop item not found." });
     }
 
+    req.itemCost = results[0].cost_points;
     req.item = results[0];
     next();
   };
@@ -54,12 +56,13 @@ module.exports.checkShopItemExists = (req, res, next) => {
 };
 module.exports.checkSufficientPoints = (req, res, next) => {
   const qty = req.body.quantity ? Number(req.body.quantity) : 1;
-  const totalCost = Number(req.item.cost_points) * qty;
+
+  const unitCost = (req.finalUnitCost ?? Number(req.item.cost_points));
+
+  const totalCost = unitCost * qty;
 
   if (Number(req.user.points) < totalCost) {
-    return res.status(409).json({
-      message: "Insufficient points."
-    });
+    return res.status(409).json({ message: "Insufficient points." });
   }
 
   req.totalCost = totalCost;
@@ -101,7 +104,6 @@ module.exports.checkInventoryRow = (req, res, next) => {
 
     shopModel.selectInventoryRow(data, callback);
 };
-
 module.exports.insertOrUpdateInventory = (req, res, next) => {
     const qty = req.qty ? req.qty : 1;
 
@@ -135,10 +137,51 @@ module.exports.insertOrUpdateInventory = (req, res, next) => {
 
     shopModel.updateInventoryQty(data, callback);
 };
-
 module.exports.sendBuySuccess = (req, res) => {
     return res.status(200).json({
         message: "Purchase successful.",
         spent_points: req.totalCost
     });
+};
+module.exports.checkActiveCreatureBenefit = (req, res, next) => {
+  const data = { user_id: req.body.user_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error checkActiveCreatureBenefit:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Active creature not found." });
+    }
+
+    // store for next middleware
+    req.activeCreature = results[0];
+    next();
+  };
+
+  creatureModel.selectActiveCreatureBenefitByUserId(data, callback);
+};
+module.exports.applyAquafinDiscount = (req, res, next) => {
+  const baseCost = Number(req.itemCost); // must be set by checkShopItemExists
+  req.finalUnitCost = baseCost;              // default: no discount
+
+  if (!req.activeCreature) return next(); // safety
+
+  const benefitType = req.activeCreature.benefit_type;
+  const stage = Number(req.activeCreature.stage);
+  const stage2Value = Number(req.activeCreature.stage2_value);
+  const stage3Value = Number(req.activeCreature.stage3_value);
+
+  // Stage 1: no benefit
+  if (stage === 1) return next();
+
+  // Only Aquafin benefit applies here
+  if (benefitType !== "SHOP_DISCOUNT") return next();
+
+  const discount = (stage === 2) ? stage2Value : stage3Value;
+
+  req.finalUnitCost = Math.max(0, baseCost - discount);
+  next();
 };
