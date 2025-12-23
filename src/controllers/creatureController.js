@@ -378,3 +378,121 @@ module.exports.sendEvolveResult = (req, res) => {
 
   creatureModel.selectActiveCreatureFull(data, callback);
 };
+
+
+module.exports.validateNewStarterBody = (req, res, next) => {
+  const { user_id, creature_id } = req.body;
+
+  if (!user_id || !creature_id) {
+    return res.status(400).json({ message: "user_id and creature_id are required." });
+  }
+  if (isNaN(user_id) || isNaN(creature_id)) {
+    return res.status(400).json({ message: "user_id and creature_id must be numbers." });
+  }
+  next();
+};
+module.exports.checkCreatureExists = (req, res, next) => {
+  const data = { creature_id: req.body.creature_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error checkCreatureExists:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Creature not found." });
+    }
+    req.creature = results[0];
+    next();
+  };
+
+  creatureModel.selectCreatureById(data, callback);
+};
+module.exports.checkAllOwnedAreStage3 = (req, res, next) => {
+  const data = { user_id: req.body.user_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error checkAllOwnedAreStage3:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    const notMaxedCount = Number(results[0].notMaxedCount);
+
+    if (notMaxedCount > 0) {
+      return res.status(409).json({
+        message: "You can only choose a new starter after ALL your creatures reach stage 3."
+      });
+    }
+
+    next();
+  };
+
+  creatureModel.countOwnedCreaturesBelowStage3(data, callback);
+};
+module.exports.checkUserDoesNotOwnCreature = (req, res, next) => {
+  const data = {
+    user_id: req.body.user_id,
+    creature_id: req.body.creature_id
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error checkUserDoesNotOwnCreature:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (results.length > 0) {
+      return res.status(409).json({
+        message: "You already own this creature."
+      });
+    }
+
+    next();
+  };
+
+  creatureModel.selectUserCreatureByUserAndCreature(data, callback);
+};
+module.exports.deactivateAllCreatures = (req, res, next) => {
+  const data = { user_id: req.body.user_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error deactivateAllCreatures:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    next();
+  };
+
+  creatureModel.deactivateAllUserCreatures(data, callback);
+};
+module.exports.createNewStarterCreature = (req, res) => {
+  const data = {
+    user_id: req.body.user_id,
+    creature_id: req.body.creature_id
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error createNewStarterCreature:", error);
+
+      // if UNIQUE(user_id, creature_id) exists, this catches duplicate too
+      if (error.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({ message: "You already own this creature." });
+      }
+
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    return res.status(201).json({
+      message: "New starter chosen.",
+      user_creature_id: results.insertId,
+      user_id: data.user_id,
+      creature_id: data.creature_id,
+      stage: 1,
+      is_active: 1
+    });
+  };
+
+  creatureModel.insertNewStarterUserCreature(data, callback);
+};

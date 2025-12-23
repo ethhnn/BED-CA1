@@ -46,8 +46,16 @@ router.put("/evolve",
   creatureController.sendEvolveResult               // 200
 );
 
-
-//add evolve
+router.post(
+  "/new",
+  creatureController.validateNewStarterBody,     // 400
+  creatureController.checkUserExists,            // 404
+  creatureController.checkCreatureExists,        // 404
+  creatureController.checkAllOwnedAreStage3,     // 409
+  creatureController.checkUserDoesNotOwnCreature,// 409
+  creatureController.deactivateAllCreatures,     // next()
+  creatureController.createNewStarterCreature,   // 201
+);
 
 
 module.exports = router;

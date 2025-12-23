@@ -254,3 +254,47 @@ module.exports.incrementEvoChallengeCount = (data, callback) => {
 
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+module.exports.selectCreatureById = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT * FROM Creature
+    WHERE creature_id = ?;
+  `;
+  pool.query(SQLSTATEMENT, [data.creature_id], callback);
+};
+module.exports.countOwnedCreaturesBelowStage3 = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT COUNT(*) AS notMaxedCount
+    FROM UserCreature
+    WHERE user_id = ?
+      AND stage < 3;
+  `;
+  pool.query(SQLSTATEMENT, [data.user_id], callback);
+};
+module.exports.selectUserCreatureByUserAndCreature = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT user_creature_id
+    FROM UserCreature
+    WHERE user_id = ?
+      AND creature_id = ?
+    LIMIT 1;
+  `;
+  pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
+};
+module.exports.deactivateAllUserCreatures = (data, callback) => {
+  const SQLSTATEMENT = `
+    UPDATE UserCreature
+    SET is_active = 0
+    WHERE user_id = ?;
+  `;
+  pool.query(SQLSTATEMENT, [data.user_id], callback);
+};
+module.exports.insertNewStarterUserCreature = (data, callback) => {
+  const SQLSTATEMENT = `
+    INSERT INTO UserCreature
+      (user_id, creature_id, stage, daily_satisfaction, evo_challenge_count, last_reset_date, is_active)
+    VALUES
+      (?, ?, 1, 0, 0, CURDATE(), 1);
+  `;
+  pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
+};

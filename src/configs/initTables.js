@@ -105,25 +105,37 @@ CREATE TABLE UserCreature (
   UNIQUE (user_id, creature_id)
 );
 INSERT INTO UserCreature
-(user_creature_id, user_id, creature_id, stage, daily_satisfaction, evo_challenge_count, last_reset_date, is_active)
+(user_id, creature_id, stage, daily_satisfaction, evo_challenge_count, last_reset_date, is_active)
 VALUES
--- Annie How (user_id = 1) : still progressing first creature (only 1 creature)
-(1, 1, 1, 1, 100, 10, '2025-12-22', 1),  -- Active: Sproutling
 
--- Buay Tah Han (user_id = 2) : first creature maxed, second unlocked and active
-(2, 2, 1, 2, 100, 30, '2025-12-22', 0),   -- Inactive: Sproutling (max evo)
-(7, 2, 2, 2, 60, 3, '2025-12-20', 1),  -- Active: Aquafin
+-- User 1: Sproutling (Stage 2 ACTIVE)
+(1, 1, 2, 0, 12, CURDATE(), 1),
 
--- Carrie Ong (user_id = 3) : still progressing first creature (only 1 creature)
-(3, 3, 3, 1, 20, 1, '2025-12-20', 1),  -- Active: Flameling
+-- User 2: Aquafin (Stage 3 ACTIVE)
+(2, 2, 3, 0, 35, CURDATE(), 1),
 
--- Da Bu Liao (user_id = 4) : first creature maxed, second unlocked and active
-(4, 4, 3, 3, 0, 0, '2025-12-20', 0),   -- Inactive: Flameling (max evo)
-(8, 4, 4, 2, 80, 4, '2025-12-20', 1),  -- Active: Zephyra
+-- User 3: Flameling (Stage 2 ACTIVE)
+(3, 3, 2, 0, 18, CURDATE(), 1),
 
--- Ee Zee Lee (user_id = 5) : first creature maxed, second unlocked and active
-(5, 5, 4, 3, 0, 0, '2025-12-20', 0),   -- Inactive: Zephyra (max evo)
-(9, 5, 5, 2, 40, 2, '2025-12-20', 1);  -- Active: Terranox
+-- User 4: Zephyra (Stage 1 ACTIVE)
+(4, 4, 1, 0, 2, CURDATE(), 1),
+
+-- User 5: Terranox (Stage 3 ACTIVE)
+(5, 5, 3, 0, 50, CURDATE(), 1),
+
+-- ========= INACTIVE CREATURES (for switching tests) =========
+
+-- User 1 extra
+(1, 2, 1, 0, 0, CURDATE(), 0),
+
+-- User 2 extra
+(2, 1, 3, 0, 0, CURDATE(), 0),
+
+-- User 3 extra
+(3, 4, 1, 0, 0, CURDATE(), 0),
+
+-- User 4 extra
+(4, 5, 2, 0, 10, CURDATE(), 0);
 
 -- ShopItem
 CREATE TABLE ShopItem (
