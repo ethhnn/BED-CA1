@@ -46,8 +46,7 @@ router.put("/evolve",
   creatureController.sendEvolveResult               // 200
 );
 
-router.post(
-  "/new",
+router.post("/new",
   creatureController.validateNewStarterBody,     // 400
   creatureController.checkUserExists,            // 404
   creatureController.checkCreatureExists,        // 404
@@ -55,6 +54,14 @@ router.post(
   creatureController.checkUserDoesNotOwnCreature,// 409
   creatureController.deactivateAllCreatures,     // next()
   creatureController.createNewStarterCreature,   // 201
+);
+router.put("/switch",
+  creatureController.validateSwitchBody,          // 400
+  creatureController.checkUserExists,             // 404
+  creatureController.checkUserOwnsCreature,       // 404
+  creatureController.checkNotAlreadyActive,       // 409
+  creatureController.deactivateAllCreatures,      // next()
+  creatureController.activateChosenCreature,      // 200
 );
 
 

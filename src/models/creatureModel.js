@@ -273,7 +273,7 @@ module.exports.countOwnedCreaturesBelowStage3 = (data, callback) => {
 };
 module.exports.selectUserCreatureByUserAndCreature = (data, callback) => {
   const SQLSTATEMENT = `
-    SELECT user_creature_id
+    SELECT user_creature_id,is_active, stage
     FROM UserCreature
     WHERE user_id = ?
       AND creature_id = ?
@@ -298,3 +298,14 @@ module.exports.insertNewStarterUserCreature = (data, callback) => {
   `;
   pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
 };
+
+
+module.exports.activateUserCreatureByUserAndCreature = (data, callback) => {
+  const SQLSTATEMENT = `
+    UPDATE UserCreature
+    SET is_active = 1
+    WHERE user_id = ?
+      AND creature_id = ?;
+  `;
+  pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
+}

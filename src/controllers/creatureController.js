@@ -496,3 +496,70 @@ module.exports.createNewStarterCreature = (req, res) => {
 
   creatureModel.insertNewStarterUserCreature(data, callback);
 };
+
+
+module.exports.validateSwitchBody = (req, res, next) => {
+  const { user_id, creature_id } = req.body;
+
+  if (!user_id || !creature_id) {
+    return res.status(400).json({ message: "user_id and creature_id are required." });
+  }
+  if (isNaN(user_id) || isNaN(creature_id)) {
+    return res.status(400).json({ message: "user_id and creature_id must be numbers." });
+  }
+  next();
+};
+module.exports.checkUserOwnsCreature = (req, res, next) => {
+  const data = {
+    user_id: req.body.user_id,
+    creature_id: req.body.creature_id
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error checkUserOwnsCreature:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "User does not own this creature." });
+    }
+
+    req.targetUserCreature = results[0]; // includes is_active, stage, etc.
+    next();
+  };
+
+  creatureModel.selectUserCreatureByUserAndCreature(data, callback);
+};
+module.exports.checkNotAlreadyActive = (req, res, next) => {
+  if (Number(req.targetUserCreature.is_active) === 1) {
+    return res.status(409).json({ message: "This creature is already active." });
+  }
+  next();
+};
+module.exports.activateChosenCreature = (req, res) => {
+  const data = {
+    user_id: req.body.user_id,
+    creature_id: req.body.creature_id
+  };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error activateChosenCreature:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (results.affectedRows === 0) {
+      // should not happen if checkUserOwnsCreature passed, but defensive
+      return res.status(404).json({ message: "User does not own this creature." });
+    }
+
+    return res.status(200).json({
+      message: "Active creature switched.",
+      user_id: data.user_id,
+      creature_id: data.creature_id
+    });
+  };
+
+  creatureModel.activateUserCreatureByUserAndCreature(data, callback);
+};
