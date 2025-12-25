@@ -57,11 +57,40 @@ module.exports.updateUserById = (data,callback) =>{
 }
 module.exports.deductPoints = (data, callback) => {
   const SQLSTATEMENT = `
-    UPDATE User
+    UPDATE user
     SET points = points - ?
     WHERE user_id = ?;
   `;
   const VALUES = [data.cost, data.user_id];
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+
+module.exports.selectTop3UsersByPoints = (callback) => {
+  const SQLSTATEMENT = `
+    SELECT user_id, points
+    FROM user
+    ORDER BY points DESC, user_id ASC
+    LIMIT 3;
+  `;
+  pool.query(SQLSTATEMENT, [], callback);
+};
+module.exports.addItemToInventoryUpsert = (data, callback) => {
+  const SQLSTATEMENT = `
+    INSERT INTO UserInventory (user_id, item_id, quantity)
+    VALUES (?, ?, 1)
+    ON DUPLICATE KEY UPDATE quantity = quantity + 1;
+  `;
+  pool.query(SQLSTATEMENT, [data.user_id, data.item_id], callback);
+};
+module.exports.updateLastLeaderboardClaimToday = (data, callback) => {
+  const SQLSTATEMENT = `
+    UPDATE user
+    SET last_leaderboard_claim = CURDATE()
+    WHERE user_id = ?;
+  `;
+  pool.query(SQLSTATEMENT, [data.user_id], callback);
+};
+
+
 

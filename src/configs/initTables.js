@@ -28,16 +28,17 @@ DROP TABLE IF EXISTS User;
 CREATE TABLE User (
   user_id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(255) NOT NULL,
-  points INT DEFAULT 0
+  points INT DEFAULT 0,
+  last_leaderboard_claim DATE
 );
 
-INSERT INTO User (username, points) VALUES
-('Annie How', 10),
-('Buay Tah Han', 20),
-('Carrie Ong', 30),
-('Da Bu Liao', 20),
-('Ee Zee Lee', 10),
-('Ha Lo Wold',40);
+INSERT INTO User (username, points, last_leaderboard_claim) VALUES
+('Annie How', 10, NULL),
+('Buay Tah Han', 20, NULL),
+('Carrie Ong', 30, NULL),
+('Da Bu Liao', 20, NULL),
+('Ee Zee Lee', 10, NULL),
+('Ha Lo Wold', 40, NULL);
 
 CREATE TABLE WellnessChallenge (
   challenge_id INT AUTO_INCREMENT PRIMARY KEY,

@@ -3,6 +3,16 @@ const router = express.Router();
 
 const userController = require('../controllers/userController');
 
+router.put("/claim",
+  userController.validateClaimBody,     // 400
+  userController.checkUserExistsBody,       // 404
+  userController.checkNotClaimedToday,  // 409
+  userController.getTop3Users,          // 403 if not top3
+  userController.giveLeaderboardItem,   // 500
+  userController.markClaimedToday,      // 500
+  userController.sendClaimSuccess       // 200
+);
+
 router.post('/',
     userController.checkIfUserExists,
     userController.createNewUser
@@ -21,5 +31,4 @@ router.put("/:user_id",
 ); //Endpoint 4
 
 
-//add top 3 
 module.exports = router;
