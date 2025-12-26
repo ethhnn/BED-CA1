@@ -276,3 +276,22 @@ module.exports.incrementEvoChallengeCount = (req, res, next) => {
 
   creatureModel.incrementEvoChallengeCount(data, callback);
 };
+
+module.exports.getCompletionsByUserId = (req, res) => {
+  const data = { user_id: req.params.user_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      console.error("Error getCompletionsByUserId:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No completion history found for this user." });
+    }
+
+    return res.status(200).json(results);
+  };
+
+  userCompletionModel.getCompletionsByUserId(data, callback);
+};

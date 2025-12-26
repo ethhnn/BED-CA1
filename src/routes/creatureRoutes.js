@@ -63,6 +63,7 @@ router.put("/switch",
   creatureController.deactivateAllCreatures,      // next()
   creatureController.activateChosenCreature,      // 200
 );
+router.get("/", creatureController.getAllCreatures);
 
 
 module.exports = router;

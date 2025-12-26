@@ -309,3 +309,17 @@ module.exports.activateUserCreatureByUserAndCreature = (data, callback) => {
   `;
   pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
 }
+
+module.exports.getAllCreatures = (callback) => {
+  const SQLSTATEMENT = `
+    SELECT
+      creature_id,
+      name,
+      description,
+      benefit_type,
+      stage2_value,
+      stage3_value
+    FROM Creature;
+  `;
+  pool.query(SQLSTATEMENT, callback);
+};

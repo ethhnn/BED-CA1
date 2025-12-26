@@ -14,5 +14,8 @@ router.post("/buy",
   shopController.insertOrUpdateInventory,
   shopController.sendBuySuccess
 );
+router.get("/items", 
+  shopController.getAllShopItems
+);
 
 module.exports = router;

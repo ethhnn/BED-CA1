@@ -185,3 +185,14 @@ module.exports.applyAquafinDiscount = (req, res, next) => {
   req.finalUnitCost = Math.max(0, baseCost - discount);
   next();
 };
+
+module.exports.getAllShopItems = (req, res) => {
+  const callback = (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    res.status(200).json(results);
+  };
+
+  shopModel.getAllShopItems(callback);
+};

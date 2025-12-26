@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const userController = require('../controllers/userController');
+const userCompletionController = require('../controllers/userCompletionController');
 
 router.put("/claim",
   userController.validateClaimBody,     // 400
@@ -12,6 +13,9 @@ router.put("/claim",
   userController.markClaimedToday,      // 500
   userController.sendClaimSuccess       // 200
 );
+router.get("/leaderboard/top10",
+  userController.getTop10Users
+);
 
 router.post('/',
     userController.checkIfUserExists,
@@ -20,6 +24,14 @@ router.post('/',
 router.get('/',
     userController.getAllUser
 ); //Endpoint 2
+router.get("/:user_id/completions",
+  userController.checkUserExists,
+  userCompletionController.getCompletionsByUserId
+);
+router.get("/:user_id/inventory",
+  userController.checkUserExists,
+  userController.getInventoryByUser
+);
 router.get("/:user_id", 
     userController.checkUserExists,
     userController.getUserById

@@ -234,3 +234,29 @@ module.exports.sendClaimSuccess = (req, res) => {
   });
 };
 
+
+module.exports.getInventoryByUser = (req, res) => {
+  const data = { user_id: req.params.user_id };
+
+  const callback = (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: "Inventory is empty." });
+    }
+    res.status(200).json(results);
+  };
+
+  userModel.getInventoryByUser(data, callback);
+};
+module.exports.getTop10Users = (req, res) => {
+  const callback = (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    res.status(200).json(results);
+  };
+
+  userModel.selectTopUsers({ limit: 10 }, callback);
+};

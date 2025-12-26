@@ -563,3 +563,15 @@ module.exports.activateChosenCreature = (req, res) => {
 
   creatureModel.activateUserCreatureByUserAndCreature(data, callback);
 };
+
+
+module.exports.getAllCreatures = (req, res) => {
+  const callback = (error, results) => {
+    if (error) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
+    res.status(200).json(results);
+  };
+
+  creatureModel.getAllCreatures(callback);
+};

@@ -92,5 +92,38 @@ module.exports.updateLastLeaderboardClaimToday = (data, callback) => {
   pool.query(SQLSTATEMENT, [data.user_id], callback);
 };
 
+module.exports.getInventoryByUser = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT
+      ui.inventory_id,
+      ui.user_id,
+      ui.item_id,
+      si.name,
+      si.description,
+      ui.quantity
+    FROM UserInventory ui
+    INNER JOIN ShopItem si
+      ON ui.item_id = si.item_id
+    WHERE ui.user_id = ?
+    ORDER BY si.name ASC;
+  `;
+  const VALUES = [data.user_id];
+
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
+module.exports.selectTopUsers = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT
+      user_id,
+      username,
+      points
+    FROM User
+    ORDER BY points DESC, user_id ASC
+    LIMIT ?;
+  `;
+  const VALUES = [data.limit];
+
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
 
 

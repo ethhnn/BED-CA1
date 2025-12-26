@@ -40,3 +40,16 @@ module.exports.updateInventoryQty = (data, callback) => {
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+module.exports.getAllShopItems = (callback) => {
+  const SQLSTATEMENT = `
+    SELECT
+      item_id,
+      name,
+      description,
+      cost_points,
+      satisfaction_gain
+    FROM ShopItem;
+  `;
+  pool.query(SQLSTATEMENT, callback);
+};

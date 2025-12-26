@@ -64,3 +64,23 @@ module.exports.deleteCompletionById = (data, callback) => {
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+module.exports.getCompletionsByUserId = (data, callback) => {
+  const SQLSTATEMENT = `
+    SELECT
+      uc.completion_id,
+      uc.challenge_id,
+      wc.description,
+      wc.points,
+      uc.details,
+      uc.completed_at
+    FROM usercompletion uc
+    INNER JOIN wellnesschallenge wc
+      ON uc.challenge_id = wc.challenge_id
+    WHERE uc.user_id = ?
+    ORDER BY uc.completed_at DESC, uc.completion_id DESC;
+  `;
+  const VALUES = [data.user_id];
+
+  pool.query(SQLSTATEMENT, VALUES, callback);
+};
