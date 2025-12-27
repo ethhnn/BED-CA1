@@ -9,17 +9,17 @@ const userCompletionController = require('../controllers/userCompletionControlle
 // =====================
 
 router.put("/claim",
-  userController.validateClaimBody,
-  userController.checkUserExistsBody,
-  userController.checkNotClaimedToday,
-  userController.getTop3Users,
-  userController.giveLeaderboardItem,
-  userController.markClaimedToday,
-  userController.sendClaimSuccess
+  userController.validateClaimBody,        // 400
+  userController.checkUserExistsBody,      // 404
+  userController.checkNotClaimedToday,     // 409
+  userController.getTop3Users,             // 403
+  userController.giveLeaderboardItem,      
+  userController.markClaimedToday,       
+  userController.sendClaimSuccess          // 200
 );
 
 router.get("/leaderboard/top10",
-  userController.getTop10Users
+  userController.getTop10Users //200
 );
 
 // =====================
@@ -27,12 +27,12 @@ router.get("/leaderboard/top10",
 // =====================
 
 router.post('/',
-  userController.checkIfUserExists,
-  userController.createNewUser
+  userController.checkIfUserExists,//409
+  userController.createNewUser//201
 );
 
 router.get('/',
-  userController.getAllUser
+  userController.getAllUser//200
 );
 
 // =====================
@@ -40,13 +40,13 @@ router.get('/',
 // =====================
 
 router.get("/:user_id/completions",
-  userController.checkUserExists,
-  userCompletionController.getCompletionsByUserId
+  userController.checkUserExists,//404
+  userCompletionController.getCompletionsByUserId//200
 );
 
 router.get("/:user_id/inventory",
-  userController.checkUserExists,
-  userController.getInventoryByUser
+  userController.checkUserExists,//404
+  userController.getInventoryByUser//200
 );
 
 // =====================
@@ -54,14 +54,14 @@ router.get("/:user_id/inventory",
 // =====================
 
 router.get("/:user_id",
-  userController.checkUserExists,
-  userController.getUserById
+  userController.checkUserExists,//404
+  userController.getUserById//200
 );
 
 router.put("/:user_id",
-  userController.checkUserExists,
-  userController.checkIfUserExists,
-  userController.updateUserById
+  userController.checkUserExists,//404 
+  userController.checkIfUserExists,//409 & 400
+  userController.updateUserById//200
 );
 
 
