@@ -7,20 +7,20 @@ const shopController = require('../controllers/shopController');
 // =====================
 
 router.get("/items",
-  shopController.getAllShopItems
+  shopController.getAllShopItems //200
 );
 
 router.post("/buy",
-  shopController.validateBuyBody,            // 400
-  shopController.checkUserExists,            // 404
-  shopController.checkShopItemExists,        // 404
-  shopController.checkActiveCreatureBenefit, // 404 (sets req.activeCreatureBenefit)
+  shopController.validateBuyBody,// 400
+  shopController.checkUserExists,// 404
+  shopController.checkShopItemExists,// 404
+  shopController.checkActiveCreatureBenefit,// 404
   shopController.applyAquafinDiscount,
-  shopController.checkSufficientPoints,      // 409
+  shopController.checkSufficientPoints,// 409
   shopController.deductUserPoints,
   shopController.checkInventoryRow,
   shopController.insertOrUpdateInventory,
-  shopController.sendBuySuccess
+  shopController.sendBuySuccess//200
 );
 
 module.exports = router;
