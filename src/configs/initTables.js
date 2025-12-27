@@ -107,7 +107,9 @@ INSERT INTO User (username, points, last_leaderboard_claim) VALUES
 ('MaxStageUser', 120, NULL),
 ('ResetTrapUser', 120, NULL),
 ('NewStarterBlockedUser', 120, NULL),
-('NewStarterAllowedUser', 120, NULL);
+('NewStarterAllowedUser', 120, NULL),
+('ChooseStarter',0,NULL),
+('noActive',0,NULL);
 
 -- =================
 -- SEED CHALLENGES
@@ -182,7 +184,9 @@ VALUES
 (10, 3, 1, 0, 0, CURDATE(), 0),
 
 (11, 4, 3, 0, 0, CURDATE(), 1),
-(11, 5, 3, 0, 0, CURDATE(), 0);
+(11, 5, 3, 0, 0, CURDATE(), 0),
+
+(12, 1, 1, 100, 10, CURDATE(), 1);
 
 -- =================
 -- SEED SHOP ITEMS

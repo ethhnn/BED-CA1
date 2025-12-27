@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const userController = require('../controllers/userController');
 const creatureController = require('../controllers/creatureController');
 
 // =====================
@@ -8,7 +9,7 @@ const creatureController = require('../controllers/creatureController');
 // =====================
 
 router.get("/",
-  creatureController.getAllCreatures
+  creatureController.getAllCreatures //200
 );
 
 // =====================
@@ -16,7 +17,8 @@ router.get("/",
 // =====================
 
 router.get("/all/:user_id",
-  creatureController.getAllCreaturesByUserId
+  userController.checkUserExists,//404
+  creatureController.getAllCreaturesByUserId //200
 );
 
 // =====================
@@ -24,53 +26,54 @@ router.get("/all/:user_id",
 // =====================
 
 router.post("/start",
-  creatureController.validateStartCreature,
-  creatureController.checkUserExists,
-  creatureController.checkUserHasNoCreature,
-  creatureController.createStarterCreature
+  creatureController.validateStartCreature,//400
+  creatureController.checkUserExists,//404
+  creatureController.checkCreatureExists,//404
+  creatureController.checkUserHasNoCreature,//409
+  creatureController.createStarterCreature//201
 );
 
 router.put("/useitem",
-  creatureController.validateUseItemBody,
-  creatureController.checkUserExists,
-  creatureController.checkActiveCreatureExists,
-  creatureController.checkInventoryHasItem,
-  creatureController.checkInventoryQuantity,
+  creatureController.validateUseItemBody,//400
+  creatureController.checkUserExists,//404
+  creatureController.checkActiveCreatureExists,//404
+  creatureController.checkInventoryHasItem,//404
+  creatureController.checkInventoryQuantity,//409
   creatureController.applyDailyResetIfNeeded,
   creatureController.consumeInventoryItem,
   creatureController.increaseSatisfaction,
-  creatureController.sendUseItemResult
+  creatureController.sendUseItemResult//200
 );
 
 router.put("/evolve",
-  creatureController.validateEvolveBody,
-  creatureController.checkUserExists,
-  creatureController.checkActiveCreatureExists,
+  creatureController.validateEvolveBody,//400
+  creatureController.checkUserExists,//404
+  creatureController.checkActiveCreatureExists,//404
   creatureController.applyDailyResetIfNeeded,
-  creatureController.checkNotMaxStage,
-  creatureController.checkEvolveRequirementsAND,
+  creatureController.checkNotMaxStage,//409
+  creatureController.checkEvolveRequirementsAND,//409
   creatureController.evolveCreature,
   creatureController.resetEvoProgress,
-  creatureController.sendEvolveResult
+  creatureController.sendEvolveResult//200
 );
 
 router.post("/new",
-  creatureController.validateNewStarterBody,
-  creatureController.checkUserExists,
-  creatureController.checkCreatureExists,
-  creatureController.checkAllOwnedAreStage3,
-  creatureController.checkUserDoesNotOwnCreature,
+  creatureController.validateNewStarterBody,//400
+  creatureController.checkUserExists,//404
+  creatureController.checkCreatureExists,//404
+  creatureController.checkAllOwnedAreStage3,//409
+  creatureController.checkUserDoesNotOwnCreature,//409
   creatureController.deactivateAllCreatures,
-  creatureController.createNewStarterCreature
+  creatureController.createNewStarterCreature//201
 );
 
 router.put("/switch",
-  creatureController.validateSwitchBody,
-  creatureController.checkUserExists,
-  creatureController.checkUserOwnsCreature,
-  creatureController.checkNotAlreadyActive,
+  creatureController.validateSwitchBody,//400
+  creatureController.checkUserExists,//404
+  creatureController.checkUserOwnsCreature,//404
+  creatureController.checkNotAlreadyActive,//409
   creatureController.deactivateAllCreatures,
-  creatureController.activateChosenCreature
+  creatureController.activateChosenCreature//200
 );
 
 // =====================
@@ -78,7 +81,8 @@ router.put("/switch",
 // =====================
 
 router.get("/:user_id",
-  creatureController.getActiveCreatureById
+  userController.checkUserExists,//404
+  creatureController.getActiveCreatureById//200,404
 );
 
 
