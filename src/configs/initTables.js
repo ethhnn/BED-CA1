@@ -85,17 +85,21 @@ CREATE TABLE UserInventory (
 -- SEED USERS
 -- =================
 -- IDs:
--- 1 TopOne (top3, can claim)
--- 2 TopTwo (top3, already claimed today -> 409)
--- 3 TopThree (top3, can claim)
--- 4 MidUser (not top3 -> 403 claim)
--- 5 PoorUser (shop insufficient points -> 409)
--- 6 StarterUser (NO creature -> /creature/start success)
--- 7 NoCreatureShopUser (NO creature -> shop 404 active creature)
--- 8 MaxStageUser (stage 3 active -> evolve 409)
--- 9 ResetTrapUser (yesterday satisfaction 100 -> resets to 0 before evolve)
--- 10 NewStarterBlockedUser (not all stage3 -> /creature/new 409)
--- 11 NewStarterAllowedUser (all stage3 -> /creature/new can succeed)
+-- 1  TopOne                 (top3, can claim; has Aquafin stage2 active for shop discount)
+-- 2  TopTwo                 (top3, already claimed today -> /claim 409)
+-- 3  TopThree               (top3, can claim; has Flameling stage2 active)
+-- 4  MidUser                (not top3 -> /claim 403; has 4 completions for milestone testing)
+-- 5  PoorUser               (0 points -> /shop/buy 409 insufficient points)
+-- 6  StarterUser            (NO creature -> /creature/start 201)
+-- 7  NoCreatureShopUser     (NO creature -> shop active creature 404)
+-- 8  MaxStageUser           (stage 3 active -> /creature/evolve 409)
+-- 9  ResetTrapUser          (yesterday satisfaction 100 -> daily reset -> /creature/evolve 409)
+-- 10 NewStarterBlockedUser  (not all owned are stage3 -> /creature/new 409)
+-- 11 NewStarterAllowedUser  (all owned are stage3 -> /creature/new can succeed; can also test "already owns" 409)
+-- 12 ChooseStarter          (has creature stage1 active -> convenient for evolve/useitem success paths if needed)
+-- 13 noActive               (user exists; no active creature seeded here)
+-- 14 EvolveReadyUser        (meets evolve requirements TODAY -> /creature/evolve 200)
+-- 15 NoActiveCreatureUser   (has creatures but NONE active -> active creature not found 404)
 INSERT INTO User (username, points, last_leaderboard_claim) VALUES
 ('TopOne', 300, NULL),
 ('TopTwo', 250, CURDATE()),
@@ -108,8 +112,10 @@ INSERT INTO User (username, points, last_leaderboard_claim) VALUES
 ('ResetTrapUser', 120, NULL),
 ('NewStarterBlockedUser', 120, NULL),
 ('NewStarterAllowedUser', 120, NULL),
-('ChooseStarter',0,NULL),
-('noActive',0,NULL);
+('ChooseStarter', 0, NULL),
+('noActive', 0, NULL),
+('EvolveReadyUser', 120, NULL),
+('NoActiveCreatureUser', 120, NULL);
 
 -- =================
 -- SEED CHALLENGES
@@ -127,8 +133,7 @@ INSERT INTO WellnessChallenge (creator_id, description, points) VALUES
 -- =========================
 -- SEED COMPLETIONS (CONTROL)
 -- =========================
--- For milestone testing: MidUser (user_id 4) has 4 completions already.
--- If MidUser uses Terranox stage2 with N=5, next completion triggers milestone bonus.
+-- MidUser (user_id 4) has 4 completions already (milestone pre-load)
 INSERT INTO UserCompletion (challenge_id, user_id, details, completed_at) VALUES
 (1, 4, 'seed', '2025-01-01 08:00:00'),
 (2, 4, 'seed', '2025-01-01 09:00:00'),
@@ -143,7 +148,7 @@ INSERT INTO UserCompletion (challenge_id, user_id, details, completed_at) VALUES
 -- SEED CREATURES
 -- =================
 -- Keep EXACTLY your 5 creatures + your benefit_type strings
--- Make Zephyra stage2 crit chance 100 for deterministic testing
+-- Zephyra stage2 crit chance 100 for deterministic testing
 INSERT INTO Creature (name, description, benefit_type, stage2_value, stage3_value) VALUES
 ('Sproutling', 'Flat bonus points on every challenge completed', 'CHALLENGE_BONUS', 5, 10),
 ('Aquafin', 'Discount on every shop purchase (reduce cost)', 'SHOP_DISCOUNT', 2, 4),
@@ -154,39 +159,45 @@ INSERT INTO Creature (name, description, benefit_type, stage2_value, stage3_valu
 -- ==========================
 -- SEED USERCREATURE (TESTING)
 -- ==========================
--- TopOne: Aquafin stage2 active -> shop discount test
--- TopTwo: Sproutling stage2 active -> completion CHALLENGE_BONUS test + claim 409
--- TopThree: Flameling stage2 active -> completion MULTIPLIER test
--- MidUser: Terranox stage2 active -> milestone triggers on next completion (already has 4 completions)
--- PoorUser: Zephyra stage2 active -> crit always triggers but shop will 409 insufficient points
--- MaxStageUser: stage3 active -> evolve 409
--- ResetTrapUser: stage1 active yesterday with satisfaction 100 -> daily reset makes evolve 409
--- NewStarterBlockedUser: owns 2 creatures, one stage2 -> /creature/new 409
--- NewStarterAllowedUser: owns 2 creatures, both stage3 -> /creature/new can succeed, and also test "already owns this creature" 409
 INSERT INTO UserCreature
 (user_id, creature_id, stage, daily_satisfaction, evo_challenge_count, last_reset_date, is_active)
 VALUES
+-- Shop discount test (Aquafin stage2 active)
 (1, 2, 2, 0, 0, CURDATE(), 1),
 
+-- Challenge bonus test (Sproutling stage2 active)
 (2, 1, 2, 0, 0, CURDATE(), 1),
 
+-- Multiplier test (Flameling stage2 active)
 (3, 3, 2, 0, 0, CURDATE(), 1),
 
+-- Milestone preloaded: satisfaction 100, evo count 9 (next completion can push to 10)
 (4, 5, 2, 100, 9, CURDATE(), 1),
 
-(5, 4, 2, 0, 0, CURDATE(), 1),
+-- Crit always triggers (Zephyra stage2 active), but user has 0 points for shop insufficient test
+(5, 4, 3, 0, 0, CURDATE(), 1),
 
+-- Max stage evolve block
 (8, 1, 3, 100, 50, CURDATE(), 1),
 
+-- Reset trap: yesterday satisfied 100 + 10, will be reset today before evolve if your reset logic runs
 (9, 1, 1, 100, 10, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 1),
 
+-- New starter blocked (has a stage2 owned creature)
 (10, 2, 2, 0, 0, CURDATE(), 1),
 (10, 3, 1, 0, 0, CURDATE(), 0),
 
+-- New starter allowed (all owned stage3)
 (11, 4, 3, 0, 0, CURDATE(), 1),
 (11, 5, 3, 0, 0, CURDATE(), 0),
 
-(12, 1, 1, 100, 10, CURDATE(), 1);
+-- Convenience: already has a stage1 active creature
+(12, 1, 1, 100, 10, CURDATE(), 1),
+
+-- Evolve success user: stage1, sat 100, evo 10 today -> /creature/evolve 200
+(14, 1, 1, 100, 10, CURDATE(), 1);
+
+-- No active creature user: owns creatures but all inactive -> active creature not found 404
 
 -- =================
 -- SEED SHOP ITEMS
@@ -200,14 +211,14 @@ INSERT INTO ShopItem (name, description, cost_points, satisfaction_gain) VALUES
 -- =====================
 -- SEED USER INVENTORIES
 -- =====================
--- For /creature/useitem:
--- TopOne has Snack qty 1 (use success, then next use -> 409 if qty request > have)
--- TopThree has Toy qty 0 (exists row, but quantity 0 -> 409 on use)
--- PoorUser has nothing for item_id 1 -> 404 item not in inventory
--- NewStarterAllowedUser has Snack qty 2 (multi-quantity use test)
 INSERT INTO UserInventory (user_id, item_id, quantity) VALUES
+-- For /creature/useitem success (qty 1)
 (1, 1, 1),
+
+-- For /creature/useitem 409 (row exists but qty 0)
 (3, 2, 0),
+
+-- For multi-use tests
 (11, 1, 2);
 `;
 

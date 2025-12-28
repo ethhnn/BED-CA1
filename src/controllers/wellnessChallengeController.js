@@ -2,8 +2,8 @@ const wellnessChallengeModel = require("../models/wellnessChallengeModel.js");
 
 module.exports.createNewChallenge = (req, res) => {
     const { description,user_id,points } = req.body;
-    if (description == null || user_id == null) {
-        return res.status(400).json({ message: "Missing Description or user ID." });
+    if (description == null || user_id == null || points == null) {
+        return res.status(400).json({ message: "Missing Description or user ID or Points." });
     }
     const data = {description,user_id,points};
 

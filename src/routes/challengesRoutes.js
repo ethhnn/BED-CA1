@@ -9,11 +9,11 @@ const userCompletionController = require('../controllers/userCompletionControlle
 // =====================
 
 router.post('/',
-  wellnessChallengeController.createNewChallenge
+  wellnessChallengeController.createNewChallenge //201,400
 );
 
 router.get('/',
-  wellnessChallengeController.getAllChallenges
+  wellnessChallengeController.getAllChallenges //200
 );
 
 // =====================
@@ -21,14 +21,14 @@ router.get('/',
 // =====================
 
 router.post('/:challenge_id',
-  userCompletionController.checkUserExists,
-  userCompletionController.checkChallengeExistsAndExtractPoints,
-  userCompletionController.checkActiveCreatureAndExtractBenefit,
+  userCompletionController.checkUserExists,//404
+  userCompletionController.checkChallengeExistsAndExtractPoints,//404
+  userCompletionController.checkActiveCreatureAndExtractBenefit,//404
   userCompletionController.applyCreatureBenefitToPoints,
   userCompletionController.createCompletionRecord,
   userCompletionController.addPoints,
   userCompletionController.incrementEvoChallengeCount,
-  userCompletionController.sendStatus
+  userCompletionController.sendStatus//201
 );
 
 // =====================
@@ -36,18 +36,18 @@ router.post('/:challenge_id',
 // =====================
 
 router.get('/:challenge_id',
-  userCompletionController.checkAttempts,
-  userCompletionController.getChallengeById
+  userCompletionController.checkAttempts,//404
+  userCompletionController.getChallengeById//200
 );
 
 router.put('/:challenge_id',
-  wellnessChallengeController.errorChecks,
-  wellnessChallengeController.updateChallengeById
+  wellnessChallengeController.errorChecks, //400,404,403
+  wellnessChallengeController.updateChallengeById//200
 );
 
 router.delete('/:challenge_id',
   userCompletionController.deleteCompletionById,
-  wellnessChallengeController.deleteChallengeById
+  wellnessChallengeController.deleteChallengeById//404,200
 );
 
 module.exports = router;
