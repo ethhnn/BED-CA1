@@ -134,11 +134,18 @@ INSERT INTO WellnessChallenge (creator_id, description, points) VALUES
 -- SEED COMPLETIONS (CONTROL)
 -- =========================
 -- MidUser (user_id 4) has 4 completions already (milestone pre-load)
+-- User11 to test creature 5 benefits
 INSERT INTO UserCompletion (challenge_id, user_id, details, completed_at) VALUES
 (1, 4, 'seed', '2025-01-01 08:00:00'),
 (2, 4, 'seed', '2025-01-01 09:00:00'),
 (3, 4, 'seed', '2025-01-01 10:00:00'),
 (4, 4, 'seed', '2025-01-01 11:00:00'),
+
+(1, 11, 'seed', '2025-01-01 08:00:00'),
+(1, 11, 'seed', '2025-01-01 08:00:00'),
+(1, 11, 'seed', '2025-01-01 08:00:00'),
+(1, 11, 'seed', '2025-01-01 08:00:00'),
+(1, 11, 'seed', '2025-01-01 08:00:00'),
 
 (1, 1, 'seed', '2025-01-02 08:00:00'),
 (2, 2, 'seed', '2025-01-02 09:00:00'),
@@ -147,13 +154,11 @@ INSERT INTO UserCompletion (challenge_id, user_id, details, completed_at) VALUES
 -- =================
 -- SEED CREATURES
 -- =================
--- Keep EXACTLY your 5 creatures + your benefit_type strings
--- Zephyra stage2 crit chance 100 for deterministic testing
 INSERT INTO Creature (name, description, benefit_type, stage2_value, stage3_value) VALUES
 ('Sproutling', 'Flat bonus points on every challenge completed', 'CHALLENGE_BONUS', 5, 10),
 ('Aquafin', 'Discount on every shop purchase (reduce cost)', 'SHOP_DISCOUNT', 2, 4),
 ('Flameling', 'Multiplier on challenge points (percentage boost)', 'CHALLENGE_MULTIPLIER', 20, 50),
-('Zephyra', 'Chance to get extra bonus points when completing a challenge (luck)', 'CHALLENGE_CRIT_CHANCE', 100, 100),
+('Zephyra', 'Chance to get extra bonus points when completing a challenge (luck)', 'CHALLENGE_CRIT_CHANCE', 20, 50),
 ('Terranox', 'Extra bonus points every N completed challenges (milestone)', 'CHALLENGE_MILESTONE', 5, 3);
 
 -- ==========================
@@ -188,8 +193,8 @@ VALUES
 (10, 3, 1, 0, 0, CURDATE(), 0),
 
 -- New starter allowed (all owned stage3)
-(11, 4, 3, 0, 0, CURDATE(), 1),
-(11, 5, 3, 0, 0, CURDATE(), 0),
+(11, 4, 3, 0, 0, CURDATE(), 0),
+(11, 5, 3, 0, 0, CURDATE(), 1),
 
 -- Convenience: already has a stage1 active creature
 (12, 1, 1, 100, 10, CURDATE(), 1),
@@ -202,7 +207,6 @@ VALUES
 -- =================
 -- SEED SHOP ITEMS
 -- =================
--- IMPORTANT: claim maps #1->item 3, #2->item 2, #3->item 1
 INSERT INTO ShopItem (name, description, cost_points, satisfaction_gain) VALUES
 ('Snack', 'Small food item', 5, 10),
 ('Toy', 'Fun toy', 10, 25),
