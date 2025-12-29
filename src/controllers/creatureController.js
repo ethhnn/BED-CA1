@@ -429,7 +429,7 @@ module.exports.validateNewStarterBody = (req, res, next) => {
   next();
 };
 
-//check if creature exists
+//check if creature exist
 module.exports.checkCreatureExists = (req, res, next) => {
   const data = { creature_id: req.body.creature_id };
 
