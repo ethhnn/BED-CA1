@@ -1,5 +1,6 @@
 const pool = require("../services/db");
 
+// Retrieve the active creature for a user
 module.exports.getActiveCreatureByUserId = (data, callback) => {
     const SQLSTATEMENT = `
         SELECT
@@ -23,6 +24,8 @@ module.exports.getActiveCreatureByUserId = (data, callback) => {
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Retrieve all creatures owned by a user
 module.exports.getAllCreaturesByUserId = (data, callback) => {
     const SQLSTATEMENT = `
         SELECT
@@ -45,6 +48,8 @@ module.exports.getAllCreaturesByUserId = (data, callback) => {
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Retrieve only creature IDs owned by a user
 module.exports.getCreaturesByUserId = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT user_creature_id
@@ -55,6 +60,8 @@ module.exports.getCreaturesByUserId = (data, callback) => {
 
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Insert starter creature for a new user
 module.exports.insertStarterCreature = (data, callback) => {
   const SQLSTATEMENT = `
     INSERT INTO UserCreature
@@ -67,7 +74,7 @@ module.exports.insertStarterCreature = (data, callback) => {
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-// 1) Get active creature core (for resets + updates)
+// Retrieve core data of the active creature
 module.exports.selectActiveCreatureCore = (data, callback) => {
     const SQLSTATEMENT = `
         SELECT
@@ -87,7 +94,7 @@ module.exports.selectActiveCreatureCore = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-// 2) Inventory check + get satisfaction_gain (JOIN ShopItem)
+// Check inventory item and retrieve satisfaction gain
 module.exports.selectInventoryItemWithGain = (data, callback) => {
     const SQLSTATEMENT = `
         SELECT
@@ -107,7 +114,7 @@ module.exports.selectInventoryItemWithGain = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-// 3) Reset active creature if new day (optional middleware)
+// Reset daily satisfaction if a new day has started
 module.exports.resetActiveCreatureIfNewDay = (data, callback) => {
     const SQLSTATEMENT = `
         UPDATE UserCreature
@@ -122,7 +129,7 @@ module.exports.resetActiveCreatureIfNewDay = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-// 4) Consume inventory item (quantity -= req.qty)
+// Decrease inventory quantity after item consumption
 module.exports.decreaseInventoryQuantity = (data, callback) => {
     const SQLSTATEMENT = `
         UPDATE UserInventory
@@ -135,7 +142,7 @@ module.exports.decreaseInventoryQuantity = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-// 5) Increase satisfaction on active creature (cap 100)
+// Increase satisfaction on active creature (capped at 100)
 module.exports.increaseActiveCreatureSatisfaction = (data, callback) => {
     const SQLSTATEMENT = `
         UPDATE UserCreature
@@ -148,14 +155,16 @@ module.exports.increaseActiveCreatureSatisfaction = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-// 6) Return active creature with Creature details (for response)
-module.exports.selectActiveCreatureFull = (data, callback) => {
+// Retrieve full active creature data
+module.exports.selectActiveCreatureFull = (data, callback) =>
+{
     const SQLSTATEMENT = `
         SELECT
             uc.user_creature_id,
             uc.user_id,
             uc.stage,
             uc.daily_satisfaction,
+            uc.evo_challenge_count,
             uc.last_reset_date,
             uc.is_active,
             c.creature_id,
@@ -174,7 +183,7 @@ module.exports.selectActiveCreatureFull = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-
+// Increase creature stage during evolution
 module.exports.incrementCreatureStage = (data, callback) => {
   const SQL = `
     UPDATE UserCreature
@@ -184,6 +193,8 @@ module.exports.incrementCreatureStage = (data, callback) => {
   `;
   pool.query(SQL, [data.user_id], callback);
 };
+
+// Reset evolution challenge counter after evolution
 module.exports.resetAfterEvolution = (data, callback) => {
   const SQL = `
     UPDATE UserCreature
@@ -193,25 +204,8 @@ module.exports.resetAfterEvolution = (data, callback) => {
   `;
   pool.query(SQL, [data.user_id], callback);
 };
-module.exports.selectActiveCreatureFull = (data, callback) => {
-  const SQL = `
-    SELECT
-      uc.user_creature_id,
-      uc.user_id,
-      uc.stage,
-      uc.daily_satisfaction,
-      uc.evo_challenge_count,
-      c.creature_id,
-      c.name AS creature_name
-    FROM UserCreature uc
-    INNER JOIN Creature c
-      ON uc.creature_id = c.creature_id
-    WHERE uc.user_id = ?
-      AND uc.is_active = 1;
-  `;
-  pool.query(SQL, [data.user_id], callback);
-};
 
+// Retrieve benefit data of active creature
 module.exports.selectActiveCreatureBenefitByUserId = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT
@@ -233,6 +227,8 @@ module.exports.selectActiveCreatureBenefitByUserId = (data, callback) => {
 
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Count total completed challenges by user
 module.exports.countUserCompletionsByUserId = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT COUNT(*) AS total
@@ -243,6 +239,8 @@ module.exports.countUserCompletionsByUserId = (data, callback) => {
 
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Increment evolution challenge counter
 module.exports.incrementEvoChallengeCount = (data, callback) => {
   const SQLSTATEMENT = `
     UPDATE UserCreature
@@ -255,6 +253,7 @@ module.exports.incrementEvoChallengeCount = (data, callback) => {
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
+// Retrieve creature master data by ID
 module.exports.selectCreatureById = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT * FROM Creature
@@ -262,6 +261,8 @@ module.exports.selectCreatureById = (data, callback) => {
   `;
   pool.query(SQLSTATEMENT, [data.creature_id], callback);
 };
+
+// Count owned creatures that are not max stage
 module.exports.countOwnedCreaturesBelowStage3 = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT COUNT(*) AS notMaxedCount
@@ -271,6 +272,8 @@ module.exports.countOwnedCreaturesBelowStage3 = (data, callback) => {
   `;
   pool.query(SQLSTATEMENT, [data.user_id], callback);
 };
+
+// Check if user already owns a specific creature
 module.exports.selectUserCreatureByUserAndCreature = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT user_creature_id,is_active, stage
@@ -281,6 +284,8 @@ module.exports.selectUserCreatureByUserAndCreature = (data, callback) => {
   `;
   pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
 };
+
+// Deactivate all creatures for a user
 module.exports.deactivateAllUserCreatures = (data, callback) => {
   const SQLSTATEMENT = `
     UPDATE UserCreature
@@ -289,6 +294,8 @@ module.exports.deactivateAllUserCreatures = (data, callback) => {
   `;
   pool.query(SQLSTATEMENT, [data.user_id], callback);
 };
+
+// Insert a new starter creature
 module.exports.insertNewStarterUserCreature = (data, callback) => {
   const SQLSTATEMENT = `
     INSERT INTO UserCreature
@@ -299,7 +306,7 @@ module.exports.insertNewStarterUserCreature = (data, callback) => {
   pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
 };
 
-
+// Activate a specific creature for a user
 module.exports.activateUserCreatureByUserAndCreature = (data, callback) => {
   const SQLSTATEMENT = `
     UPDATE UserCreature
@@ -310,6 +317,7 @@ module.exports.activateUserCreatureByUserAndCreature = (data, callback) => {
   pool.query(SQLSTATEMENT, [data.user_id, data.creature_id], callback);
 }
 
+// Retrieve all available creatures
 module.exports.getAllCreatures = (callback) => {
   const SQLSTATEMENT = `
     SELECT

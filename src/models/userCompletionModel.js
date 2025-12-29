@@ -1,5 +1,6 @@
 const pool = require('../services/db');
 
+// Check if a user exists by user_id
 module.exports.checkUserExists = (data,callback) =>{
     const SQLSTATEMENT=`
     SELECT * FROM user WHERE user_id = ?;
@@ -7,6 +8,8 @@ module.exports.checkUserExists = (data,callback) =>{
     const VALUES = [data.user_id];
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+// Check if a challenge exists and retrieve its points
 module.exports.checkChallengeExistsAndExtractPoints = (data,callback) =>{
     const SQLSTATEMENT=`
     SELECT points
@@ -16,6 +19,8 @@ module.exports.checkChallengeExistsAndExtractPoints = (data,callback) =>{
     const VALUES = [data.challenge_id]
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+// Add points to a user after completing a challenge
 module.exports.addPoints = (data,callback) =>{
     const SQLSTATEMENT=`
     UPDATE user
@@ -25,6 +30,8 @@ module.exports.addPoints = (data,callback) =>{
     const VALUES = [data.points,data.user_id];
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+// Create a completion record for a challenge attempt
 module.exports.createCompletionRecord = (data,callback) =>{
     const SQLSTATEMENT=`
     INSERT INTO usercompletion (challenge_id,user_id,details)
@@ -33,6 +40,8 @@ module.exports.createCompletionRecord = (data,callback) =>{
     const VALUES = [data.challenge_id,data.user_id,data.details];
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+// Check if a challenge has any completion attempts
 module.exports.checkAttempts = (data, callback) => {
     const SQLSTATEMENT = `
     SELECT *
@@ -44,6 +53,8 @@ module.exports.checkAttempts = (data, callback) => {
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Retrieve users and details for a specific challenge
 module.exports.getChallengeById = (data, callback) => {
     const SQLSTATEMENT = `
     SELECT user_id, details
@@ -55,6 +66,8 @@ module.exports.getChallengeById = (data, callback) => {
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Delete all completion records for a challenge
 module.exports.deleteCompletionById = (data, callback) => {
     const SQLSTATEMENT = `
     DELETE FROM usercompletion
@@ -65,6 +78,7 @@ module.exports.deleteCompletionById = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
 
+// Retrieve all completed challenges by a user
 module.exports.getCompletionsByUserId = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT

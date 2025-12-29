@@ -1,5 +1,7 @@
 const pool = require("../services/db");
 
+// Retrieve a shop item by item_id
+// Used to check item existence and cost before purchase
 module.exports.selectShopItemById = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT item_id, cost_points
@@ -9,6 +11,8 @@ module.exports.selectShopItemById = (data, callback) => {
   const VALUES = [data.item_id];
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Check if a user already owns the item
 module.exports.selectInventoryRow = (data, callback) => {
     const SQLSTATEMENT = `
         SELECT inventory_id, quantity
@@ -20,6 +24,7 @@ module.exports.selectInventoryRow = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
+// Insert a new inventory record
 module.exports.insertInventoryRow = (data, callback) => {
     const SQLSTATEMENT = `
         INSERT INTO UserInventory (user_id, item_id, quantity)
@@ -30,6 +35,7 @@ module.exports.insertInventoryRow = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
+// Update inventory quantity
 module.exports.updateInventoryQty = (data, callback) => {
     const SQLSTATEMENT = `
         UPDATE UserInventory
@@ -41,6 +47,7 @@ module.exports.updateInventoryQty = (data, callback) => {
     pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
+// Retrieve all shop items
 module.exports.getAllShopItems = (callback) => {
   const SQLSTATEMENT = `
     SELECT

@@ -1,5 +1,6 @@
 const pool = require('../services/db');
 
+// Check if a username already exists
 module.exports.checkIfUserExists = (data, callback) =>
 { 
     const SQLSTATEMENT = `
@@ -10,6 +11,8 @@ module.exports.checkIfUserExists = (data, callback) =>
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+// Create a new user with default points
 module.exports.createNewUser = (data, callback) =>
 {
     const SQLSTATEMENT = `
@@ -21,12 +24,15 @@ module.exports.createNewUser = (data, callback) =>
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
 
+// Retrieve all users
 module.exports.getAllUser = (callback) =>{
     const SQLSTATEMENT = `
     SELECT * FROM user
     `;
     pool.query(SQLSTATEMENT, callback);
 }
+
+// Check if a user exists by user_id
 module.exports.checkUserExists = (data, callback) =>
 { 
     const SQLSTATEMENT = `
@@ -37,6 +43,8 @@ module.exports.checkUserExists = (data, callback) =>
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+// Retrieve a single user by ID
 module.exports.getUserById = (data,callback) =>{
     const SQLSTATEMENT = `
     SELECT * FROM user
@@ -45,6 +53,8 @@ module.exports.getUserById = (data,callback) =>{
     const VALUES = [data.user_id]
     pool.query(SQLSTATEMENT,VALUES, callback);
 }
+
+// Update username and points for a user
 module.exports.updateUserById = (data,callback) =>{
     const SQLSTATEMENT = `
     UPDATE user 
@@ -55,6 +65,8 @@ module.exports.updateUserById = (data,callback) =>{
 
     pool.query(SQLSTATEMENT, VALUES, callback);
 }
+
+// Deduct points from a user
 module.exports.deductPoints = (data, callback) => {
   const SQLSTATEMENT = `
     UPDATE user
@@ -65,7 +77,7 @@ module.exports.deductPoints = (data, callback) => {
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
 
-
+// Retrieve top 3 users by points
 module.exports.selectTop3UsersByPoints = (callback) => {
   const SQLSTATEMENT = `
     SELECT user_id, points
@@ -75,6 +87,9 @@ module.exports.selectTop3UsersByPoints = (callback) => {
   `;
   pool.query(SQLSTATEMENT, [], callback);
 };
+
+// Add item to user inventory
+// If item exists, increase quantity by 1
 module.exports.addItemToInventoryUpsert = (data, callback) => {
   const SQLSTATEMENT = `
     INSERT INTO UserInventory (user_id, item_id, quantity)
@@ -83,6 +98,8 @@ module.exports.addItemToInventoryUpsert = (data, callback) => {
   `;
   pool.query(SQLSTATEMENT, [data.user_id, data.item_id], callback);
 };
+
+// Update last leaderboard claim date (once per day logic)
 module.exports.updateLastLeaderboardClaimToday = (data, callback) => {
   const SQLSTATEMENT = `
     UPDATE user
@@ -92,6 +109,7 @@ module.exports.updateLastLeaderboardClaimToday = (data, callback) => {
   pool.query(SQLSTATEMENT, [data.user_id], callback);
 };
 
+// Retrieve inventory items for a user
 module.exports.getInventoryByUser = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT
@@ -111,6 +129,8 @@ module.exports.getInventoryByUser = (data, callback) => {
 
   pool.query(SQLSTATEMENT, VALUES, callback);
 };
+
+// Retrieve top N users (dynamic leaderboard size)
 module.exports.selectTopUsers = (data, callback) => {
   const SQLSTATEMENT = `
     SELECT
