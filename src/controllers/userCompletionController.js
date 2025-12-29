@@ -1,5 +1,7 @@
 const userCompletionModel = require("../models/userCompletionModel.js");
 const creatureModel = require("../models/creatureModel");
+
+// Middleware: check user exists (body user_id)
 module.exports.checkUserExists = (req, res, next) =>
 {
     const { user_id,details } = req.body;
@@ -27,6 +29,8 @@ module.exports.checkUserExists = (req, res, next) =>
 
     userCompletionModel.checkUserExists(data, callback);
 };
+
+// Middleware: check challenge exists and store challenge points on req
 module.exports.checkChallengeExistsAndExtractPoints= (req, res,next) =>{
     const { user_id,details } = req.body;
     const data = {
@@ -49,6 +53,8 @@ module.exports.checkChallengeExistsAndExtractPoints= (req, res,next) =>{
     } 
     userCompletionModel.checkChallengeExistsAndExtractPoints(data, callback);
 }
+
+// Middleware: create completion record and store completion_id on req
 module.exports.createCompletionRecord = (req, res,next) =>{ 
     const { user_id,details } = req.body;
     const data = {
@@ -71,6 +77,8 @@ module.exports.createCompletionRecord = (req, res,next) =>{
     
         userCompletionModel.createCompletionRecord(data, callback);
 }
+
+// Middleware: add points to user (uses creature bonus if present)
 module.exports.addPoints = (req, res,next) =>{
     const { user_id,details } = req.body;
     const data = {
@@ -91,6 +99,8 @@ module.exports.addPoints = (req, res,next) =>{
 
     userCompletionModel.addPoints(data, callback);
 }
+
+// Final handler for POST completion route
 module.exports.sendStatus =(req,res) =>{
     const { user_id,details } = req.body;
     return res.status(201).json({
@@ -100,6 +110,8 @@ module.exports.sendStatus =(req,res) =>{
                     "details":details
                 });
 }
+
+// Middleware: check for attempts
 module.exports.checkAttempts = (req, res, next) => {
     const data = {
         challenge_id: req.params.challenge_id
@@ -122,6 +134,8 @@ module.exports.checkAttempts = (req, res, next) => {
 
     userCompletionModel.checkAttempts(data, callback);
 };
+
+//Gets challenge by Id
 module.exports.getChallengeById = (req, res) => {
     const data = {
         challenge_id: req.params.challenge_id
@@ -137,6 +151,8 @@ module.exports.getChallengeById = (req, res) => {
 
     userCompletionModel.getChallengeById(data, callback);
 };
+
+// Middleware: delete completions for a challenge
 module.exports.deleteCompletionById = (req,res,next) =>
 {
     const data = {
@@ -155,6 +171,7 @@ module.exports.deleteCompletionById = (req,res,next) =>
     userCompletionModel.deleteCompletionById(data, callback);
 };
 
+// Middleware: get active creature benefit info and store on req
 module.exports.checkActiveCreatureAndExtractBenefit = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -177,6 +194,8 @@ module.exports.checkActiveCreatureAndExtractBenefit = (req, res, next) => {
 
   creatureModel.selectActiveCreatureBenefitByUserId(data, callback);
 };
+
+// Middleware: apply creature benefit to points
 module.exports.applyCreatureBenefitToPoints = (req, res, next) => {
   const basePoints = Number(req.points);
   const stage = Number(req.activeCreature.stage);
@@ -195,7 +214,7 @@ module.exports.applyCreatureBenefitToPoints = (req, res, next) => {
   // pick stage value
   const stageValue = (stage === 2) ? stage2Value : stage3Value;
 
-  // IMPORTANT: Aquafin SHOP_DISCOUNT is NOT applied here (shop endpoint only)
+  // Shop discount applies only to shop endpoint
   if (benefitType === "SHOP_DISCOUNT") return next();
 
   // Sproutling style: flat bonus
@@ -214,7 +233,6 @@ module.exports.applyCreatureBenefitToPoints = (req, res, next) => {
   }
 
   // Zephyra style: crit chance stored as INT % (e.g. 20 = 20%)
-  // bonus is fixed to keep table simple
   if (benefitType === "CHALLENGE_CRIT_CHANCE") {
     const chance = stageValue;
     const bonus = (stage === 2) ? 10 : 20;
@@ -230,7 +248,6 @@ module.exports.applyCreatureBenefitToPoints = (req, res, next) => {
   }
 
   // Terranox style: milestone every N completions
-  // stageValue is N (e.g. 5 or 3). bonus fixed for simplicity.
   if (benefitType === "CHALLENGE_MILESTONE") {
     const data = { user_id: req.body.user_id };
 
@@ -263,6 +280,8 @@ module.exports.applyCreatureBenefitToPoints = (req, res, next) => {
   // unknown benefit type -> ignore safely
   return next();
 };
+
+// Middleware: increment evo counter after completion
 module.exports.incrementEvoChallengeCount = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -277,6 +296,7 @@ module.exports.incrementEvoChallengeCount = (req, res, next) => {
   creatureModel.incrementEvoChallengeCount(data, callback);
 };
 
+// Retrieve completion history for a user
 module.exports.getCompletionsByUserId = (req, res) => {
   const data = { user_id: req.params.user_id };
 

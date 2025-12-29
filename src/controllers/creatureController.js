@@ -1,6 +1,8 @@
 const creatureModel = require("../models/creatureModel");
 const userModel = require("../models/userModel");
 const MAX_STAGE = 3;
+
+// Retrieve the currently active creature for a user
 module.exports.getActiveCreatureById = (req, res) => {
     const data = {
         user_id: req.params.user_id
@@ -23,6 +25,8 @@ module.exports.getActiveCreatureById = (req, res) => {
 
     creatureModel.getActiveCreatureByUserId(data, callback);
 };
+
+// Retrieve all creatures owned by a user
 module.exports.getAllCreaturesByUserId = (req, res) => {
     const data = {
         user_id: req.params.user_id
@@ -40,6 +44,8 @@ module.exports.getAllCreaturesByUserId = (req, res) => {
 
     creatureModel.getAllCreaturesByUserId(data, callback);
 };
+
+// Validate body for starting creature
 module.exports.validateStartCreature = (req, res, next) => {
   const { user_id, creature_id } = req.body;
 
@@ -57,6 +63,8 @@ module.exports.validateStartCreature = (req, res, next) => {
 
   next();
 };
+
+// Ensure user does NOT already own any creature
 module.exports.checkUserHasNoCreature = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -77,6 +85,8 @@ module.exports.checkUserHasNoCreature = (req, res, next) => {
 
   creatureModel.getCreaturesByUserId(data, callback);
 };
+
+// Create starter creature (stage 1, active)
 module.exports.createStarterCreature = (req, res) => {
   const data = {
     user_id: req.body.user_id,
@@ -97,6 +107,7 @@ module.exports.createStarterCreature = (req, res) => {
   creatureModel.insertStarterCreature(data, callback);
 };
 
+// Validate body for using item
 module.exports.validateUseItemBody = (req, res, next) => {
     const { user_id, item_id, quantity } = req.body;
 
@@ -126,6 +137,8 @@ module.exports.validateUseItemBody = (req, res, next) => {
 
     next();
 };
+
+// Check user exists (body user_id)
 module.exports.checkUserExists = (req, res, next) => {
     const data = { user_id: req.body.user_id };
 
@@ -145,6 +158,8 @@ module.exports.checkUserExists = (req, res, next) => {
 
     userModel.getUserById(data, callback); // if yours is named differently, use that
 };
+
+// Check active creature exists
 module.exports.checkActiveCreatureExists = (req, res, next) => {
     const data = { user_id: req.body.user_id };
 
@@ -166,6 +181,8 @@ module.exports.checkActiveCreatureExists = (req, res, next) => {
 
     creatureModel.selectActiveCreatureCore(data, callback);
 };
+
+// Check inventory has item
 module.exports.checkInventoryHasItem = (req, res, next) => {
     const data = {
         user_id: req.body.user_id,
@@ -191,6 +208,8 @@ module.exports.checkInventoryHasItem = (req, res, next) => {
 
     creatureModel.selectInventoryItemWithGain(data, callback);
 };
+
+// Ensure inventory quantity sufficient
 module.exports.checkInventoryQuantity = (req, res, next) => {
     const have = Number(req.inventoryItem.quantity);
     const need = Number(req.qty);
@@ -203,6 +222,8 @@ module.exports.checkInventoryQuantity = (req, res, next) => {
 
     next();
 };
+
+// Reset daily satisfaction if new day
 module.exports.applyDailyResetIfNeeded = (req, res, next) => {
     const data = { user_id: req.body.user_id };
 
@@ -228,6 +249,8 @@ module.exports.applyDailyResetIfNeeded = (req, res, next) => {
 
     creatureModel.resetActiveCreatureIfNewDay(data, callback);
 };
+
+// Consume item from inventory
 module.exports.consumeInventoryItem = (req, res, next) => {
     const data = {
         user_id: req.body.user_id,
@@ -247,6 +270,8 @@ module.exports.consumeInventoryItem = (req, res, next) => {
 
     creatureModel.decreaseInventoryQuantity(data, callback);
 };
+
+// Increase creature satisfaction
 module.exports.increaseSatisfaction = (req, res, next) => {
     const gainPerItem = Number(req.inventoryItem.satisfaction_gain);
     const totalGain = gainPerItem * Number(req.qty);
@@ -267,6 +292,8 @@ module.exports.increaseSatisfaction = (req, res, next) => {
 
     creatureModel.increaseActiveCreatureSatisfaction(data, callback);
 };
+
+// Final response for use item
 module.exports.sendUseItemResult = (req, res) => {
     const data = { user_id: req.body.user_id };
 
@@ -292,6 +319,7 @@ module.exports.sendUseItemResult = (req, res) => {
     creatureModel.selectActiveCreatureFull(data, callback);
 };
 
+//Validate body for evolve
 module.exports.validateEvolveBody = (req, res, next) => {
   const { user_id } = req.body;
 
@@ -303,6 +331,8 @@ module.exports.validateEvolveBody = (req, res, next) => {
 
   next();
 };
+
+// Block if already max stage
 module.exports.checkNotMaxStage = (req, res, next) => {
   if (req.activeCreature.stage >= MAX_STAGE) {
     return res.status(409).json({
@@ -311,6 +341,8 @@ module.exports.checkNotMaxStage = (req, res, next) => {
   }
   next();
 };
+
+// Check evolution requirements
 module.exports.checkEvolveRequirementsAND = (req, res, next) => {
   const { stage, daily_satisfaction, evo_challenge_count } = req.activeCreature;
 
@@ -334,6 +366,8 @@ module.exports.checkEvolveRequirementsAND = (req, res, next) => {
 
   next();
 };
+
+// Increase creature stage
 module.exports.evolveCreature = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -347,6 +381,8 @@ module.exports.evolveCreature = (req, res, next) => {
 
   creatureModel.incrementCreatureStage(data, callback);
 };
+
+// Reset evolution progress after evolve
 module.exports.resetEvoProgress = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -361,6 +397,7 @@ module.exports.resetEvoProgress = (req, res, next) => {
   creatureModel.resetAfterEvolution(data, callback);
 };
 
+// Final evolve response
 module.exports.sendEvolveResult = (req, res) => {
   const data = { user_id: req.body.user_id };
 
@@ -379,7 +416,7 @@ module.exports.sendEvolveResult = (req, res) => {
   creatureModel.selectActiveCreatureFull(data, callback);
 };
 
-
+//Validate body for new starter
 module.exports.validateNewStarterBody = (req, res, next) => {
   const { user_id, creature_id } = req.body;
 
@@ -391,6 +428,8 @@ module.exports.validateNewStarterBody = (req, res, next) => {
   }
   next();
 };
+
+//check if creature exists
 module.exports.checkCreatureExists = (req, res, next) => {
   const data = { creature_id: req.body.creature_id };
 
@@ -408,6 +447,8 @@ module.exports.checkCreatureExists = (req, res, next) => {
 
   creatureModel.selectCreatureById(data, callback);
 };
+
+//check if all creature owned by user are at max stage(stage3)
 module.exports.checkAllOwnedAreStage3 = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -430,6 +471,8 @@ module.exports.checkAllOwnedAreStage3 = (req, res, next) => {
 
   creatureModel.countOwnedCreaturesBelowStage3(data, callback);
 };
+
+//check that user does not already own target creature
 module.exports.checkUserDoesNotOwnCreature = (req, res, next) => {
   const data = {
     user_id: req.body.user_id,
@@ -453,6 +496,8 @@ module.exports.checkUserDoesNotOwnCreature = (req, res, next) => {
 
   creatureModel.selectUserCreatureByUserAndCreature(data, callback);
 };
+
+//deactivate all creature(set active to 0)
 module.exports.deactivateAllCreatures = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -497,7 +542,7 @@ module.exports.createNewStarterCreature = (req, res) => {
   creatureModel.insertNewStarterUserCreature(data, callback);
 };
 
-
+//Validate body for switch
 module.exports.validateSwitchBody = (req, res, next) => {
   const { user_id, creature_id } = req.body;
 
@@ -509,6 +554,8 @@ module.exports.validateSwitchBody = (req, res, next) => {
   }
   next();
 };
+
+// Ensure user owns target creature
 module.exports.checkUserOwnsCreature = (req, res, next) => {
   const data = {
     user_id: req.body.user_id,
@@ -531,12 +578,16 @@ module.exports.checkUserOwnsCreature = (req, res, next) => {
 
   creatureModel.selectUserCreatureByUserAndCreature(data, callback);
 };
+
+// Block switching to already active creature
 module.exports.checkNotAlreadyActive = (req, res, next) => {
   if (Number(req.targetUserCreature.is_active) === 1) {
     return res.status(409).json({ message: "This creature is already active." });
   }
   next();
 };
+
+// Activate chosen creature
 module.exports.activateChosenCreature = (req, res) => {
   const data = {
     user_id: req.body.user_id,
@@ -564,7 +615,7 @@ module.exports.activateChosenCreature = (req, res) => {
   creatureModel.activateUserCreatureByUserAndCreature(data, callback);
 };
 
-
+//Get creature's master list
 module.exports.getAllCreatures = (req, res) => {
   const callback = (error, results) => {
     if (error) {

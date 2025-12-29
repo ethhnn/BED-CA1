@@ -1,9 +1,10 @@
 const userModel = require("../models/userModel.js");
 
-
+// Validates username + blocks duplicates
 module.exports.checkIfUserExists = (req, res, next) =>
 {
     const { username } = req.body;
+    // Body validation
     if (username == null) {
         return res.status(400).json({ message: "Missing username." });
     }
@@ -12,8 +13,9 @@ module.exports.checkIfUserExists = (req, res, next) =>
     const callback = (error, results) => {
         if (error) {
             console.error("Error checkIfUserExists:", error);
-            res.status(500).json(error);
+            return res.status(500).json({message: "Internal server error"});
         } else {
+            // If username already exists
             if(results.length > 0) 
             {
                 res.status(409).json({
@@ -28,6 +30,8 @@ module.exports.checkIfUserExists = (req, res, next) =>
 
     userModel.checkIfUserExists(data, callback);
 };
+
+// Creates a new user
 module.exports.createNewUser = (req, res) => {
     const { username } = req.body;
 
@@ -50,6 +54,8 @@ module.exports.createNewUser = (req, res) => {
 
     userModel.createNewUser(data, callback);
 };
+
+// Retrieves all users
 module.exports.getAllUser =(req,res)=>{ 
     const callback = (error, results) => {
         if (error) {
@@ -62,6 +68,8 @@ module.exports.getAllUser =(req,res)=>{
 
     userModel.getAllUser(callback);
 };
+
+// Ensures user exists before continuing
 module.exports.checkUserExists = (req, res, next) =>
 {
     const data = {
@@ -70,7 +78,7 @@ module.exports.checkUserExists = (req, res, next) =>
     const callback = (error, results) => {
         if (error) {
             console.error("Error checkUserExists:", error);
-            res.status(500).json(error);
+            return res.status(500).json({message: "Internal server error"});
         } else {
             if(results.length == 0) 
             {
@@ -86,6 +94,8 @@ module.exports.checkUserExists = (req, res, next) =>
 
     userModel.checkUserExists(data, callback);
 };
+
+// Returns user details
 module.exports.getUserById =(req,res)=>{ 
     const data = {
         user_id: req.params.user_id
@@ -101,6 +111,8 @@ module.exports.getUserById =(req,res)=>{
 
     userModel.getUserById(data,callback);
 };
+
+// Updates username and points
 module.exports.updateUserById = (req, res) =>
 {
     const { username,points } = req.body;
@@ -125,6 +137,7 @@ module.exports.updateUserById = (req, res) =>
     userModel.updateUserById(data, callback);
 }
 
+// Middleware for claim route
 module.exports.validateClaimBody = (req, res, next) => {
   const { user_id } = req.body;
 
@@ -137,6 +150,9 @@ module.exports.validateClaimBody = (req, res, next) => {
 
   next();
 };
+
+// Middleware: ensure user exists using body user_id
+// Also stores user row into req.user
 module.exports.checkUserExistsBody = (req, res, next) =>
 {
   const data = { user_id: req.body.user_id };
@@ -156,9 +172,12 @@ module.exports.checkUserExistsBody = (req, res, next) =>
 
   userModel.checkUserExists(data, callback);
 };
+
+// Middleware: block claiming reward more than once per day
 module.exports.checkNotClaimedToday = (req, res, next) => {
   
   const lastClaim = req.user.last_leaderboard_claim;
+  // Build YYYY-MM-DD string for today's date
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, "0");
@@ -171,6 +190,8 @@ module.exports.checkNotClaimedToday = (req, res, next) => {
 
   next();
 };
+
+// Middleware: check if user is in top 3 today, decide reward item
 module.exports.getTop3Users = (req, res, next) => {
   const callback = (error, results) => {
     if (error) {
@@ -182,7 +203,8 @@ module.exports.getTop3Users = (req, res, next) => {
     const top3 = results.map(r => Number(r.user_id));
     const uid = Number(req.body.user_id);
 
-    const rankIndex = top3.indexOf(uid); // 0,1,2 or -1
+    // Find user's rank (0,1,2) or not found (-1)
+    const rankIndex = top3.indexOf(uid);
     if (rankIndex === -1) {
       return res.status(403).json({ message: "You are not in today's top 3." });
     }
@@ -197,6 +219,8 @@ module.exports.getTop3Users = (req, res, next) => {
 
   userModel.selectTop3UsersByPoints(callback);
 };
+
+// Middleware: give reward item (upsert into inventory)
 module.exports.giveLeaderboardItem = (req, res, next) => {
   const data = {
     user_id: req.body.user_id,
@@ -213,6 +237,8 @@ module.exports.giveLeaderboardItem = (req, res, next) => {
 
   userModel.addItemToInventoryUpsert(data, callback);
 };
+
+// Middleware: mark claim date as today (prevents repeated claiming)
 module.exports.markClaimedToday = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -226,6 +252,8 @@ module.exports.markClaimedToday = (req, res, next) => {
 
   userModel.updateLastLeaderboardClaimToday(data, callback);
 };
+
+// Final handler: claim success response
 module.exports.sendClaimSuccess = (req, res) => {
   return res.status(200).json({
     message: "Reward claimed.",
@@ -234,7 +262,7 @@ module.exports.sendClaimSuccess = (req, res) => {
   });
 };
 
-
+// Retrieves inventory list
 module.exports.getInventoryByUser = (req, res) => {
   const data = { user_id: req.params.user_id };
 
@@ -250,6 +278,8 @@ module.exports.getInventoryByUser = (req, res) => {
 
   userModel.getInventoryByUser(data, callback);
 };
+
+// Retrieves top 10 users by points
 module.exports.getTop10Users = (req, res) => {
   const callback = (error, results) => {
     if (error) {

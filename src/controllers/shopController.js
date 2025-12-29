@@ -1,6 +1,8 @@
 const shopModel = require("../models/shopModel");
 const userModel = require("../models/userModel");
 const creatureModel = require("../models/creatureModel");
+
+// Validate buy request body
 module.exports.validateBuyBody = (req, res, next) => {
   const { user_id, item_id, quantity } = req.body;
 
@@ -17,6 +19,8 @@ module.exports.validateBuyBody = (req, res, next) => {
 
   next();
 };
+
+// Middleware: ensure user exists
 module.exports.checkUserExists = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -35,6 +39,8 @@ module.exports.checkUserExists = (req, res, next) => {
 
   userModel.getUserById(data, callback);
 };
+
+// Middleware: ensure shop item exists
 module.exports.checkShopItemExists = (req, res, next) => {
   const data = { item_id: req.body.item_id };
 
@@ -54,6 +60,8 @@ module.exports.checkShopItemExists = (req, res, next) => {
 
   shopModel.selectShopItemById(data, callback);
 };
+
+// Middleware: check sufficient points based on qty * (discounted) unit cost
 module.exports.checkSufficientPoints = (req, res, next) => {
   const qty = req.body.quantity ? Number(req.body.quantity) : 1;
 
@@ -69,6 +77,8 @@ module.exports.checkSufficientPoints = (req, res, next) => {
   req.qty = qty;
   next();
 };
+
+// Middleware: deduct user points for purchase
 module.exports.deductUserPoints = (req, res, next) => {
   const data = {
     user_id: req.body.user_id,
@@ -85,6 +95,8 @@ module.exports.deductUserPoints = (req, res, next) => {
 
   userModel.deductPoints(data, callback);
 };
+
+// Middleware: check if inventory row already exists for this user + item
 module.exports.checkInventoryRow = (req, res, next) => {
     const data = {
         user_id: req.body.user_id,
@@ -104,6 +116,8 @@ module.exports.checkInventoryRow = (req, res, next) => {
 
     shopModel.selectInventoryRow(data, callback);
 };
+
+// Middleware: insert new inventory row or update quantity
 module.exports.insertOrUpdateInventory = (req, res, next) => {
     const qty = req.qty ? req.qty : 1;
 
@@ -137,12 +151,16 @@ module.exports.insertOrUpdateInventory = (req, res, next) => {
 
     shopModel.updateInventoryQty(data, callback);
 };
+
+// Final handler: purchase success response
 module.exports.sendBuySuccess = (req, res) => {
     return res.status(200).json({
         message: "Purchase successful.",
         spent_points: req.totalCost
     });
 };
+
+// Middleware: check user's active creature for discount benefit
 module.exports.checkActiveCreatureBenefit = (req, res, next) => {
   const data = { user_id: req.body.user_id };
 
@@ -163,6 +181,8 @@ module.exports.checkActiveCreatureBenefit = (req, res, next) => {
 
   creatureModel.selectActiveCreatureBenefitByUserId(data, callback);
 };
+
+// Middleware: apply Aquafin discount (SHOP_DISCOUNT) to unit cost
 module.exports.applyAquafinDiscount = (req, res, next) => {
   const baseCost = Number(req.itemCost); // must be set by checkShopItemExists
   req.finalUnitCost = baseCost;              // default: no discount
@@ -186,6 +206,7 @@ module.exports.applyAquafinDiscount = (req, res, next) => {
   next();
 };
 
+// Retrieve all shop items
 module.exports.getAllShopItems = (req, res) => {
   const callback = (error, results) => {
     if (error) {
