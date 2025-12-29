@@ -15,7 +15,3 @@ const HOST = 'localhost';
 app.listen(PORT,()=> {
     console.log(`App listening to port ${PORT}`);
 });
-
-// app.listen(PORT, HOST, ()=> {
-//     console.log(`App listening to IP address ${HOST} and port ${PORT}`);
-// });
